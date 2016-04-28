@@ -24,24 +24,6 @@ int button_pin = 3;
 int buttonState = 0;
 int debounce = 0;
 
-Menu m_root("ROOT");
-Menu m_trem("TREM");
-Menu m_prog("PROG");
-Menu m_conf("CONF");
-MenuItem t_bpm("BPM ");
-MenuItem t_dept("DEPT");
-MenuItem t_wave("WAVE");
-MenuItem t_multi("MULT");
-MenuItem t_mod("MOD ");
-MenuItem p_p1("PR 1");
-MenuItem p_p2("PR 2");
-MenuItem p_p3("PR 3");
-MenuItem p_p4("PR 4");
-MenuItem c_mode("MODE");
-MenuItem c_exp("EXP ");
-MenuItem c_cal("CAL ");
-MenuItem m_exit("EXIT");
-
 Rotary r = Rotary(2, 4);
 WaveGenerator waveGenerator = WaveGenerator(bpm, &depth, wave, mult, &mod);
 MedusaDisplay medusaDisplay;
@@ -126,6 +108,24 @@ void bootAnimation()
     medusaDisplay.clear();
 }
 
+Menu m_root("ROOT");
+Menu m_trem("TREM");
+Menu m_prog("PROG");
+Menu m_conf("CONF");
+MenuItem t_bpm("BPM ");
+MenuItem t_dept("DEPT");
+MenuItem t_wave("WAVE");
+MenuItem t_multi("MULT");
+MenuItem t_mod("MOD ");
+MenuItem p_p1("PR 1");
+MenuItem p_p2("PR 2");
+MenuItem p_p3("PR 3");
+MenuItem p_p4("PR 4");
+MenuItem c_mode("MODE");
+MenuItem c_exp("EXP ");
+MenuItem c_cal("CAL ");
+MenuItem m_exit("EXIT");
+
 void setupMenu()
 {
     m_root.add_menu(&m_trem);
@@ -151,7 +151,6 @@ void setupMenu()
     m_conf.add_item(&m_exit, &back);
 
     poseidonMenu.set_root_menu(&m_root);
-    //end menu
 
     displayMenuItem();
 }
