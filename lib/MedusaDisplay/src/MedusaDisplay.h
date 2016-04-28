@@ -33,7 +33,7 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-#define HT16K33_CMD_BRIGHTNESS 0x02
+#define HT16K33_CMD_BRIGHTNESS 0xE0
 #define HT16K33_BLINK_CMD 0x80
 #define HT16K33_BLINK_DISPLAYON 0x01
 #define HT16K33_BLINK_OFF 0
@@ -45,17 +45,20 @@ class MedusaDisplay
 {
 public:
     MedusaDisplay(void);
+
     void begin(uint8_t _addr, uint8_t _b);
     void setBrightness(uint8_t _b);
     void blinkRate(uint8_t _b);
-    void writeDisplay(void);
     void clear(void);
 
-    uint16_t displaybuffer[4];
-private:
-    void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
-    void writeDigitAscii(uint8_t _n, uint8_t _ascii, boolean _dot = false);
+    void writeDisplay(char _word[]);
+    void writeDisplay(int _num);
+protected:
     uint8_t i2c_addr;
+    uint16_t display_buffer[4];
+
+    void flushBuffer(void); // move to private
+    void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
 };
 
 #endif

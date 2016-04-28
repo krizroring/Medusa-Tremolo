@@ -65,7 +65,7 @@ static const uint16_t alphafonttable[] PROGMEM =  {
 0b0001001011001000,
 0b0011101000000000,
 0b0001011100000000,
-0b0000000000000000, //
+0b0000000000000000, // 32
 0b0000000000000110, // !
 0b0000001000100000, // "
 0b0001001011001110, // #
@@ -81,7 +81,7 @@ static const uint16_t alphafonttable[] PROGMEM =  {
 0b0000000011000000, // -
 0b0000000000000000, // .
 0b0000110000000000, // /
-0b0000110000111111, // 0
+0b0000110000111111, // 0 //48
 0b0000000000000110, // 1
 0b0000000011011011, // 2
 0b0000000010001111, // 3
@@ -90,7 +90,7 @@ static const uint16_t alphafonttable[] PROGMEM =  {
 0b0000000011111101, // 6
 0b0000000000000111, // 7
 0b0000000011111111, // 8
-0b0000000011101111, // 9
+0b0000000011101111, // 9 //57
 0b0001001000000000, // :
 0b0000101000000000, // ;
 0b0010010000000000, // <
@@ -98,7 +98,7 @@ static const uint16_t alphafonttable[] PROGMEM =  {
 0b0000100100000000, // >
 0b0001000010000011, // ?
 0b0000001010111011, // @
-0b0000000011110111, // A
+0b0000000011110111, // A 65
 0b0001001010001111, // B
 0b0000000000111001, // C
 0b0001001000001111, // D
@@ -173,22 +173,27 @@ void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 2) {
   Wire.beginTransmission(i2c_addr);
   Wire.write(0x21);  // turn on oscillator
   Wire.endTransmission();
-  // blinkRate(HT16K33_BLINK_OFF);
+
+  blinkRate(HT16K33_BLINK_OFF);
+
   setBrightness(_b);
 }
 
 void MedusaDisplay::clear(void) {
   for (uint8_t i=0; i<4; i++) {
-    displaybuffer[i] = 0;
+    display_buffer[i] = 0;
   }
+
+  flushBuffer();
 }
 
 void MedusaDisplay::setBrightness(uint8_t _b) {
-  if (_b > 15) _b = 15;
-  Wire.beginTransmission(i2c_addr);
-  Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
-  Wire.endTransmission();
+    if (_b > 5) _b = 5;
+    Wire.beginTransmission(i2c_addr);
+    Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
+    Wire.endTransmission();
 }
+
 void MedusaDisplay::blinkRate(uint8_t _b) {
   Wire.beginTransmission(i2c_addr);
   if (_b > 3) _b = 0; // turn off if not sure
@@ -197,31 +202,54 @@ void MedusaDisplay::blinkRate(uint8_t _b) {
   Wire.endTransmission();
 }
 
-void MedusaDisplay::writeDisplay(void) {
+void MedusaDisplay::writeDisplay(char _word[])
+{
+    // add option to automaticly pad array if shorter then 4
+    for (uint8_t i=0; i<4; i++) {
+        display_buffer[i] = pgm_read_word(alphafonttable+_word[i]);
+    }
+
+    // add dot: if (_d) display_buffer[_n] |= (1<<14);
+    flushBuffer();
+}
+
+void MedusaDisplay::writeDisplay(int _num)
+{
+    int temp[4];
+    int i;
+
+    for (i = 3; i >= 0; i--) {
+        temp[i] = _num % 10;
+        _num /= 10;
+    }
+    boolean removeLeadingZero = true;
+
+    for (i = 0; i < 3; i++) {
+        if(removeLeadingZero && temp[i] == 0)
+        {
+            display_buffer[i] = pgm_read_word(alphafonttable+32);
+        }
+        else {
+            display_buffer[i] = pgm_read_word(alphafonttable+(temp[i]+48));
+            removeLeadingZero = false;
+        }
+    }
+
+    display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
+    flushBuffer();
+}
+
+void MedusaDisplay::flushBuffer(void) {
   Wire.beginTransmission(i2c_addr);
   Wire.write((uint8_t)0x00); // start at address $00
 
   for (uint8_t i=0; i<4; i++) {
-    Wire.write(displaybuffer[i] & 0xFF);
-    Wire.write(displaybuffer[i] >> 8);
+    Wire.write(display_buffer[i] & 0xFF);
+    Wire.write(display_buffer[i] >> 8);
   }
   Wire.endTransmission();
 }
-/******************************* QUAD ALPHANUM OBJECT */
 
-void MedusaDisplay::writeDigitRaw(uint8_t _n, uint16_t _bitmask) {
-  displaybuffer[_n] = _bitmask;
-}
-
-void MedusaDisplay::writeDigitAscii(uint8_t _n, uint8_t _a,  boolean _d) {
-  uint16_t font = pgm_read_word(alphafonttable+_a);
-
-  displaybuffer[_n] = font;
-  /*
-  Serial.print(a, DEC);
-  Serial.print(" / '"); Serial.write(a);
-  Serial.print("' = 0x"); Serial.println(font, HEX);
-  */
-
-  if (_d) displaybuffer[_n] |= (1<<14);
+void MedusaDisplay::writeDigitRaw(uint8_t n, uint16_t bitmask) {
+  display_buffer[n] = bitmask;
 }
