@@ -24,7 +24,7 @@ public:
      @param float* _multi Pointer to the multiplier.
      @param int* _mod Pointer to the modulation.
      */
-     WaveGenerator(unsigned int, unsigned int*, int*, float*, int*);
+     WaveGenerator(unsigned int, unsigned int*, int, float, int*);
 
      /**
      Updates the internal period to incorporate the old en new offset
@@ -34,10 +34,10 @@ public:
      Generates the waveform for the wave led (vactrol) and a status led
      */
      int generate();
-private:
+protected:
     unsigned int *depth;
-    int *wave;
-    float *multi;
+    int wave;
+    float multi;
     int *mod;
     unsigned int lfo;
 

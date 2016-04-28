@@ -9,16 +9,13 @@
 #include "Arduino.h"
 #include "WaveGenerator.h"
 
-WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int *_wave, float *_multi, int *_mod)
+WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int _wave, float _multi, int *_mod)
 {
     depth = _depth;
     wave = _wave;
     multi = _multi;
     mod = _mod;
     lfo = 8;
-
-    period = BPM_2_PERIOD(120);
-    periodMultiplied = period * *multi;
 
     firstPeriod = millis();
 
@@ -28,14 +25,15 @@ WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int *_wave
     waveFn[3] = &WaveGenerator::waveSaw;
     waveFn[4] = &WaveGenerator::waveReverseSaw;
 
-    updatePeriod(BPM_2_PERIOD(_bpm));
+    updatePeriod(_bpm);
 };
 
-void WaveGenerator::updatePeriod(int _newVal)
+void WaveGenerator::updatePeriod(int _bpm)
 {
-    period = _newVal;
+    int _period = BPM_2_PERIOD(_bpm);
+    period = _period;
 
-    int newPeriodMultiplied = _newVal * *multi;
+    int newPeriodMultiplied = _period * multi;
 
     currentMillis = millis();
     unsigned int _offset = (currentMillis - firstPeriod) % periodMultiplied;
@@ -58,7 +56,7 @@ int WaveGenerator::generate()
     float modulation = 0.0;
     if (*mod > 0.0) modulation = generateLFO();
 
-    return constrain((this->*waveFn[*wave])(offset) + modulation, 0, 255);
+    return constrain((this->*waveFn[wave])(offset) + modulation, 0, 255);
 };
 
 //Private functions
