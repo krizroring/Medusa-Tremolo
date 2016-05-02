@@ -71,17 +71,20 @@ public:
      * _word The char array
      */
     void writeDisplay(char _word[]);
+
     /*
      * Writes a int to the display
      * _num The int (0 - 9999)
      */
     void writeDisplay(int _num);
+
+
+    void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
 protected:
     uint8_t i2c_addr;
     uint16_t display_buffer[4];
 
     void flushBuffer(void);
-    void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
 };
 
 #endif

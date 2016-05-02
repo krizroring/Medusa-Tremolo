@@ -29,11 +29,11 @@ void menuItemSelected(int);
 Rotary r = Rotary(2, 4);
 WaveGenerator waveGenerator = WaveGenerator(bpm, &depth, wave, mult, &mod);
 MedusaDisplay medusaDisplay;
-PoseidonMenu poseidonMenu = PoseidonMenu(&menuItemSelected, &medusaDisplay);
+PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
 
 char pedalName[] = "   POSEIDON   ";
 
-boolean isMemu = true;
+boolean isMenu = true;
 
 void bootAnimation();
 void setupMenu();
@@ -41,19 +41,20 @@ void toDisplay(char*);
 
 void menuItemSelected(int _selectedMenuItem)
 {
-    Serial.print("Selected: ");
-    Serial.println(_selectedMenuItem);
+    medusaDisplay.writeDisplay((char*)"TEST");
 }
 
 void setup()
 {
+    Serial.begin(9600);
+
     medusaDisplay.begin(0x70, 1);
     medusaDisplay.clear();
 
     pinMode(button_pin, INPUT_PULLUP);
 
-    bootAnimation();
-    delay(1000);
+    // bootAnimation();
+    // delay(1000);
 
     poseidonMenu.displayCurrentMenu();
 
@@ -65,9 +66,15 @@ void loop() {
     buttonState = digitalRead(button_pin);
 
     if (buttonState == LOW && debounce == 0) {
-        if (isMemu)
+        if (isMenu)
+        {
+            isMenu = false;
+            menuItemSelected(poseidonMenu.getSelectedMenu());
+        }
+        else
         {
             poseidonMenu.displayCurrentMenu();
+            isMenu = true;
         }
 
         debounce = 1;

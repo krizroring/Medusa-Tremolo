@@ -215,6 +215,8 @@ void MedusaDisplay::writeDisplay(char _word[])
 
 void MedusaDisplay::writeDisplay(int _num)
 {
+    Serial.println(_num);
+
     int temp[4];
     int i;
 

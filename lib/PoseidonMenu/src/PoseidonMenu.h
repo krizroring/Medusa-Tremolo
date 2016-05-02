@@ -14,12 +14,14 @@ class PoseidonMenu
 public:
     // add the boot animation?
 
-    PoseidonMenu(void (*)(int), MedusaDisplay *);
+    PoseidonMenu(MedusaDisplay *);
     void next();
     void prev();
     void displayCurrentMenu();
+    int getSelectedMenu();
 protected:
-    unsigned int menuIndex;
+    int menuIndex;
+    char buffer[5];
     MedusaDisplay *display;
     void writeDisplay();
 };

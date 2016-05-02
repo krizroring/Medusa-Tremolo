@@ -24,7 +24,7 @@ const char* const MENU_NAMES[] PROGMEM = {
 
 static const int MENU_LENGTH = 6;
 
-PoseidonMenu::PoseidonMenu(void (*_callBack)(int), MedusaDisplay *_display)
+PoseidonMenu::PoseidonMenu(MedusaDisplay *_display)
 {
     menuIndex = 0;
     display = _display;
@@ -52,7 +52,13 @@ void PoseidonMenu::displayCurrentMenu()
     writeDisplay();
 }
 
+int PoseidonMenu::getSelectedMenu()
+{
+    return menuIndex;
+}
+
 void PoseidonMenu::writeDisplay()
 {
-    (*display).writeDisplay(pgm_read_word(MENU_NAMES+menuIndex));
+    strcpy_P(buffer, (char*)pgm_read_word(&(MENU_NAMES[menuIndex])));
+    (*display).writeDisplay(buffer);
 }
