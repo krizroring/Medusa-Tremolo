@@ -188,17 +188,20 @@ void MedusaDisplay::clear(void) {
 }
 
 void MedusaDisplay::setBrightness(uint8_t _b) {
-    if (_b > 5) _b = 5;
     Wire.beginTransmission(i2c_addr);
+
+    if (_b > 5) _b = 5;
     Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
+
     Wire.endTransmission();
 }
 
 void MedusaDisplay::blinkRate(uint8_t _b) {
   Wire.beginTransmission(i2c_addr);
-  if (_b > 3) _b = 0; // turn off if not sure
 
+  if (_b > 3) _b = 0; // turn off if not sure
   Wire.write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (_b << 1));
+
   Wire.endTransmission();
 }
 
@@ -213,8 +216,6 @@ void MedusaDisplay::writeDisplay(char _word[]) {
 }
 
 void MedusaDisplay::writeDisplay(int _num) {
-    Serial.println(_num);
-
     int temp[4];
     int i;
 
@@ -222,7 +223,7 @@ void MedusaDisplay::writeDisplay(int _num) {
         temp[i] = _num % 10;
         _num /= 10;
     }
-    
+
     boolean removeLeadingZero = true;
 
     for (i = 0; i < 3; i++) {
@@ -246,6 +247,7 @@ void MedusaDisplay::flushBuffer(void) {
     Wire.write(display_buffer[i] & 0xFF);
     Wire.write(display_buffer[i] >> 8);
   }
+
   Wire.endTransmission();
 }
 
