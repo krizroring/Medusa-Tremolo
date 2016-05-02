@@ -45,19 +45,42 @@ class MedusaDisplay
 {
 public:
     MedusaDisplay(void);
-
+    /*
+     * Initializes the menu
+     * _addr The I2C address
+     * _b The brightness (0-4)
+     */
     void begin(uint8_t _addr, uint8_t _b);
+    /*
+     * Sets the brightness
+     * _b The brightness (0-4)
+     */
     void setBrightness(uint8_t _b);
+    /*
+     * Sets the blink rate of the display
+     * _b The blink rate (0-3)
+     */
     void blinkRate(uint8_t _b);
+    /*
+     * Clears the display
+     */
     void clear(void);
 
+    /*
+     * Writes a char array to the display
+     * _word The char array
+     */
     void writeDisplay(char _word[]);
+    /*
+     * Writes a int to the display
+     * _num The int (0 - 9999)
+     */
     void writeDisplay(int _num);
 protected:
     uint8_t i2c_addr;
     uint16_t display_buffer[4];
 
-    void flushBuffer(void); // move to private
+    void flushBuffer(void);
     void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
 };
 
