@@ -9,8 +9,7 @@
 #include "Arduino.h"
 #include "WaveGenerator.h"
 
-WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int _wave, float _multi, int *_mod)
-{
+WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int _wave, float _multi, int *_mod) {
     depth = _depth;
     wave = _wave;
     multi = _multi;
@@ -28,8 +27,7 @@ WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int _wave,
     updateBPM(_bpm);
 };
 
-void WaveGenerator::updateBPM(int _bpm)
-{
+void WaveGenerator::updateBPM(int _bpm) {
     bpm = _bpm;
     int _period = BPM_2_PERIOD(_bpm);
     period = _period;
@@ -49,20 +47,17 @@ void WaveGenerator::updateBPM(int _bpm)
     periodMultiplied = newPeriodMultiplied;
 };
 
-void WaveGenerator::updateWave(int _wave)
-{
+void WaveGenerator::updateWave(int _wave) {
     wave = _wave;
     updateBPM(bpm);
 };
 
-void WaveGenerator::updateMultiplier(float _multi)
-{
+void WaveGenerator::updateMultiplier(float _multi) {
     multi = _multi;
     updateBPM(bpm);
 }
 
-int WaveGenerator::generate()
-{
+int WaveGenerator::generate() {
     currentMillis = millis();
     int offset = (currentMillis - firstPeriod) % periodMultiplied;
 
@@ -75,47 +70,37 @@ int WaveGenerator::generate()
 //Private functions
 
 // actually cos so we're on at period start
-int WaveGenerator::waveSin(unsigned int _offset)
-{
+int WaveGenerator::waveSin(unsigned int _offset) {
     float rads = ((float)_offset / (float)periodMultiplied) * TWO_PI;
 
     return constrain((cos(rads) + 1.0) * (255 - *depth) / 2.0 + *depth, 0, 255); //cap at 255 instead of 256
 }
 
-int WaveGenerator::waveSquare(unsigned int _offset)
-{
+int WaveGenerator::waveSquare(unsigned int _offset) {
     if(_offset < halfMultipliedPeriod) {
         return 255;
-    }
-    else {
+    } else {
         return *depth;
     }
 }
 
-int WaveGenerator::waveTri(unsigned int _offset)
-{
-    if(_offset < halfMultipliedPeriod)
-    {
+int WaveGenerator::waveTri(unsigned int _offset) {
+    if(_offset < halfMultipliedPeriod) {
         return map(_offset, 0, halfMultipliedPeriod, 255, *depth);
-    }
-    else
-    {
+    } else {
         return map(_offset, halfMultipliedPeriod + 1, periodMultiplied - 1, *depth, 255);
     }
 }
 
-int WaveGenerator::waveSaw(unsigned int _offset)
-{
+int WaveGenerator::waveSaw(unsigned int _offset) {
     return map(_offset, 0, periodMultiplied - 1, *depth, 255);
 }
 
-int WaveGenerator::waveReverseSaw(unsigned int _offset)
-{
+int WaveGenerator::waveReverseSaw(unsigned int _offset) {
   return map(_offset, 0, periodMultiplied - 1, 255, *depth);
 }
 
-float WaveGenerator::generateLFO()
-{
+float WaveGenerator::generateLFO() {
     unsigned int modOffset = (currentMillis - firstPeriod) % (period * lfo);
     // generate the mod rad
     float modRads = ((float)modOffset / (float)(period * lfo)) * TWO_PI;

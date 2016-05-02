@@ -13,6 +13,12 @@ const char item2[5] PROGMEM = "WAVE";
 const char item3[5] PROGMEM = "MULT";
 const char item4[5] PROGMEM = "MOD ";
 const char item5[5] PROGMEM = "EXP ";
+const char item6[5] PROGMEM = "EXP ";
+const char item7[5] PROGMEM = "EXP ";
+const char item8[5] PROGMEM = "EXP ";
+const char item9[5] PROGMEM = "EXP ";
+const char item10[5] PROGMEM = "EXP ";
+const char item11[5] PROGMEM = "EXP ";
 const char* const MENU_NAMES[] PROGMEM = {
     item0,
     item1,
@@ -24,41 +30,33 @@ const char* const MENU_NAMES[] PROGMEM = {
 
 static const int MENU_LENGTH = 6;
 
-PoseidonMenu::PoseidonMenu(MedusaDisplay *_display)
-{
+PoseidonMenu::PoseidonMenu(MedusaDisplay *_display) {
     menuIndex = 0;
     display = _display;
 };
 
-void PoseidonMenu::next()
-{
-    if((menuIndex + 1) < MENU_LENGTH)
-    {
+void PoseidonMenu::next() {
+    if((menuIndex + 1) < MENU_LENGTH) {
         menuIndex++;
         writeDisplay();
     }
 }
-void PoseidonMenu::prev()
-{
-    if((menuIndex - 1) >= 0)
-    {
+void PoseidonMenu::prev() {
+    if((menuIndex - 1) >= 0) {
         menuIndex--;
         writeDisplay();
     }
 }
 
-void PoseidonMenu::displayCurrentMenu()
-{
+void PoseidonMenu::displayCurrentMenu() {
     writeDisplay();
 }
 
-int PoseidonMenu::getSelectedMenu()
-{
+int PoseidonMenu::getSelectedMenu() {
     return menuIndex;
 }
 
-void PoseidonMenu::writeDisplay()
-{
+void PoseidonMenu::writeDisplay() {
     strcpy_P(buffer, (char*)pgm_read_word(&(MENU_NAMES[menuIndex])));
     (*display).writeDisplay(buffer);
 }

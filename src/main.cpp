@@ -53,8 +53,8 @@ void setup()
 
     pinMode(button_pin, INPUT_PULLUP);
 
-    // bootAnimation();
-    // delay(1000);
+    bootAnimation();
+    delay(1000);
 
     poseidonMenu.displayCurrentMenu();
 
@@ -73,6 +73,9 @@ void loop() {
         }
         else
         {
+            medusaDisplay.blinkRate(HT16K33_BLINK_2HZ);
+            delay(1000);
+            medusaDisplay.blinkRate(HT16K33_BLINK_OFF);
             poseidonMenu.displayCurrentMenu();
             isMenu = true;
         }

@@ -202,8 +202,7 @@ void MedusaDisplay::blinkRate(uint8_t _b) {
   Wire.endTransmission();
 }
 
-void MedusaDisplay::writeDisplay(char _word[])
-{
+void MedusaDisplay::writeDisplay(char _word[]) {
     // add option to automaticly pad array if shorter then 4
     for (uint8_t i=0; i<4; i++) {
         display_buffer[i] = pgm_read_word(alphafonttable+_word[i]);
@@ -213,8 +212,7 @@ void MedusaDisplay::writeDisplay(char _word[])
     flushBuffer();
 }
 
-void MedusaDisplay::writeDisplay(int _num)
-{
+void MedusaDisplay::writeDisplay(int _num) {
     Serial.println(_num);
 
     int temp[4];
@@ -224,14 +222,13 @@ void MedusaDisplay::writeDisplay(int _num)
         temp[i] = _num % 10;
         _num /= 10;
     }
+    
     boolean removeLeadingZero = true;
 
     for (i = 0; i < 3; i++) {
-        if(removeLeadingZero && temp[i] == 0)
-        {
+        if(removeLeadingZero && temp[i] == 0) {
             display_buffer[i] = pgm_read_word(alphafonttable+32);
-        }
-        else {
+        } else {
             display_buffer[i] = pgm_read_word(alphafonttable+(temp[i]+48));
             removeLeadingZero = false;
         }
