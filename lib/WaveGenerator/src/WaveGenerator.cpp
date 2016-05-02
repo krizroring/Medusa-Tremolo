@@ -25,11 +25,12 @@ WaveGenerator::WaveGenerator(unsigned int _bpm, unsigned int *_depth, int _wave,
     waveFn[3] = &WaveGenerator::waveSaw;
     waveFn[4] = &WaveGenerator::waveReverseSaw;
 
-    updatePeriod(_bpm);
+    updateBPM(_bpm);
 };
 
-void WaveGenerator::updatePeriod(int _bpm)
+void WaveGenerator::updateBPM(int _bpm)
 {
+    bpm = _bpm;
     int _period = BPM_2_PERIOD(_bpm);
     period = _period;
 
@@ -47,6 +48,18 @@ void WaveGenerator::updatePeriod(int _bpm)
 
     periodMultiplied = newPeriodMultiplied;
 };
+
+void WaveGenerator::updateWave(int _wave)
+{
+    wave = _wave;
+    updateBPM(bpm);
+};
+
+void WaveGenerator::updateMultiplier(float _multi)
+{
+    multi = _multi;
+    updateBPM(bpm);
+}
 
 int WaveGenerator::generate()
 {

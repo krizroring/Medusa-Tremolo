@@ -20,21 +20,30 @@ public:
      Initialization function
      @param unsigned int _bpm The BPM value.
      @param unsigned int* _depth Pointer to the depth.
-     @param int* _wave Pointer to the wave type.
-     @param float* _multi Pointer to the multiplier.
+     @param int _wave Pointer to the wave type.
+     @param float _multi Pointer to the multiplier.
      @param int* _mod Pointer to the modulation.
      */
      WaveGenerator(unsigned int, unsigned int*, int, float, int*);
 
      /**
-     Updates the internal period to incorporate the old en new offset
+     Updates the bpm
      */
-     void updatePeriod(int);
+     void updateBPM(int);
+     /**
+     Updates the wave form
+     */
+     void updateWave(int);
+     /**
+     Updates the bpm
+     */
+     void updateMultiplier(float);
      /**
      Generates the waveform for the wave led (vactrol) and a status led
      */
      int generate();
 protected:
+    int bpm;
     unsigned int *depth;
     int wave;
     float multi;
