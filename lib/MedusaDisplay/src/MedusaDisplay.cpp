@@ -190,7 +190,7 @@ void MedusaDisplay::clear(void) {
 void MedusaDisplay::setBrightness(uint8_t _b) {
     Wire.beginTransmission(i2c_addr);
 
-    if (_b > 5) _b = 5;
+    if (_b > 4) _b = 4;
     Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
 
     Wire.endTransmission();
