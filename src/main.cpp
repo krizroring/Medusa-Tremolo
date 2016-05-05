@@ -9,16 +9,11 @@
 #include "MedusaDisplay.h"
 #include "PoseidonMenu.h"
 
-unsigned int bpm = 60;
-unsigned int depth = 100; // set depth
+int bpm = 120;
+int depth = 100; // set depth
 int wave = 0;
-float mult = 1;
-int mod = 10; // mod depth
-unsigned int lfo = 8;
-
-int maxDisplayDepth = 99;
-int minDisplayDepth = 0;
-int displayDepth = map(depth, 255, 0, minDisplayDepth, maxDisplayDepth);
+int mult = 2;
+int mod = 0; // mod depth
 
 int button_pin = 3;
 int buttonState = 0;
@@ -27,26 +22,77 @@ int debounce = 0;
 void menuItemSelected(int);
 
 Rotary r = Rotary(2, 4);
-WaveGenerator waveGenerator = WaveGenerator(bpm, &depth, wave, mult, &mod);
+
+WaveGenerator waveGenerator = WaveGenerator(bpm, depth, wave, mult, mod);
+
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
 
 char pedalName[] = "   POSEIDON   ";
 
 boolean isMenu = true;
+boolean isActive = true;
+
+int output = 0;
+
+void (*changeAction)(int);
 
 void bootAnimation();
 void setupMenu();
 void toDisplay(char*);
 
+#define NEXT 1
+#define PREV -1
+
+void changeBPM(int _direction) {
+    bpm = waveGenerator.updateBPM(_direction);
+    medusaDisplay.writeDisplay(bpm);
+}
+
+void changeDepth(int _direction) {
+    depth = waveGenerator.updateDepth(_direction);
+
+    medusaDisplay.writeDisplay(depth);
+}
+
+void changeWave(int _direction) {
+    wave = waveGenerator.updateWave(_direction);
+    medusaDisplay.writeDisplay(wave);
+}
+
 void menuItemSelected(int _selectedMenuItem)
 {
-    medusaDisplay.writeDisplay((char*)"TEST");
+    switch (_selectedMenuItem) {
+        case 0:
+            changeAction = &changeBPM;
+            medusaDisplay.writeDisplay(bpm);
+            break;
+        case 1:
+            changeAction = &changeDepth;
+            medusaDisplay.writeDisplay(depth);
+            break;
+        case 2:
+            changeAction = &changeWave;
+            medusaDisplay.writeDisplay(wave);
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        default:
+
+            break;
+    };
 }
 
 void setup()
 {
     Serial.begin(9600);
+
+    pinMode(9, OUTPUT);
+    pinMode(10, OUTPUT);
 
     medusaDisplay.begin(0x70, 1);
     medusaDisplay.clear();
@@ -55,7 +101,6 @@ void setup()
 
     bootAnimation();
     delay(1000);
-
     poseidonMenu.displayCurrentMenu();
 
     // set the prescaler
@@ -66,13 +111,10 @@ void loop() {
     buttonState = digitalRead(button_pin);
 
     if (buttonState == LOW && debounce == 0) {
-        if (isMenu)
-        {
+        if (isMenu) {
             isMenu = false;
             menuItemSelected(poseidonMenu.getSelectedMenu());
-        }
-        else
-        {
+        } else {
             medusaDisplay.blinkRate(HT16K33_BLINK_2HZ);
             delay(1000);
             medusaDisplay.blinkRate(HT16K33_BLINK_OFF);
@@ -87,16 +129,29 @@ void loop() {
     }
 
     unsigned char result = r.process();
-    if (result == DIR_NONE) {
-      // do nothing
+    if(result != DIR_NONE){
+        // use dynamic allocation of function
+        if (result == DIR_CW && isMenu) {
+            poseidonMenu.next();
+        } else if (result == DIR_CW && !isMenu) {
+            (*changeAction)(NEXT);
+        } else if (result == DIR_CCW && isMenu) {
+            poseidonMenu.prev();
+        } else if (result == DIR_CCW && !isMenu) {
+            (*changeAction)(PREV);
+        }
     }
-    // use dynamic allocation of function
-    else if (result == DIR_CW) {
-        poseidonMenu.next();
-    }
-    else if (result == DIR_CCW) {
-        poseidonMenu.prev();
-    }
+
+
+    int _output = waveGenerator.generate();
+
+    // if (output != _output){
+        output = _output;
+        analogWrite(9, output);
+        analogWrite(10, output);
+        Serial.println(output);
+    // }
+
 }
 
 void bootAnimation()
