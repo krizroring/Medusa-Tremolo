@@ -58,10 +58,10 @@ int WaveGenerator::updateBPM(int _modifier) {
 
 int WaveGenerator::updateDepth(int _modifier) {
     depth += _modifier;
-    depth = constrain(depth, MAX_DEPTH, MIN_DEPTH);
+    depth = constrain(depth, MIN_DEPTH, MAX_DEPTH);
 
-    ldrDepth = map(depth, MIN_DEPTH, MAX_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
-
+    ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
+    // check if MAX LDR = 0 and MIN LDR = 255
     return depth;
 }
 int WaveGenerator::updateWave(int _modifier) {

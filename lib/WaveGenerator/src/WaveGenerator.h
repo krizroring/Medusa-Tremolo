@@ -16,8 +16,8 @@
 
 #define MIN_BPM 60
 #define MAX_BPM 240
-#define MIN_DEPTH 100
-#define MAX_DEPTH 0
+#define MIN_DEPTH 0
+#define MAX_DEPTH 100
 #define MIN_WAVE 0
 #define MAX_WAVE 4
 #define MIN_MOD 0
