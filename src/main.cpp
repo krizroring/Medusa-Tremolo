@@ -9,11 +9,38 @@
 #include "MedusaDisplay.h"
 #include "PoseidonMenu.h"
 
+
+const char WAVE_SINE[] PROGMEM = "SINE";
+const char WAVE_SQR[] PROGMEM = "SQR ";
+const char WAVE_TRI[] PROGMEM = "TRI ";
+const char WAVE_SAW[] PROGMEM = "SAW ";
+const char WAVE_RSAW[] PROGMEM = "RSAW";
+const char MULT_0[] PROGMEM = "1/4X";
+const char MULT_1[] PROGMEM = "1/2X";
+const char MULT_2[] PROGMEM = "  1X";
+const char MULT_3[] PROGMEM = "  2X";
+const char MULT_4[] PROGMEM = "  4X";
+
+const char* const WAVE_NAMES[] PROGMEM = {
+    WAVE_SINE,
+    WAVE_SQR,
+    WAVE_TRI,
+    WAVE_SAW,
+    WAVE_RSAW
+};
+const char* const MULTI_NAMES[] PROGMEM = {
+    MULT_0,
+    MULT_1,
+    MULT_2,
+    MULT_3,
+    MULT_4
+};
+
 int bpm = 120;
 int depth = 100; // set depth
 int wave = 0;
 int mult = 2;
-int mod = 0; // mod depth
+int mod = 10; // mod depth
 
 int button_pin = 3;
 int buttonState = 0;
@@ -51,35 +78,52 @@ void changeBPM(int _direction) {
 
 void changeDepth(int _direction) {
     depth = waveGenerator.updateDepth(_direction);
-
     medusaDisplay.writeDisplay(depth);
 }
 
 void changeWave(int _direction) {
     wave = waveGenerator.updateWave(_direction);
-    medusaDisplay.writeDisplay(wave);
+
+    char _buffer[5];
+    strcpy_P(_buffer, (char*)pgm_read_word(&(WAVE_NAMES[wave])));
+    medusaDisplay.writeDisplay(_buffer);
+}
+
+void changeMultiplier(int _direction) {
+    mult = waveGenerator.updateMultiplier(_direction);
+
+    char _buffer[5];
+    strcpy_P(_buffer, (char*)pgm_read_word(&(MULTI_NAMES[mult])));
+    medusaDisplay.writeDisplay(_buffer);
+}
+
+void changeModulation(int _direction) {
+    mod = waveGenerator.updateModulation(_direction);
+    medusaDisplay.writeDisplay(mod);
 }
 
 void menuItemSelected(int _selectedMenuItem)
 {
     switch (_selectedMenuItem) {
         case 0:
+            changeBPM(0);
             changeAction = &changeBPM;
-            medusaDisplay.writeDisplay(bpm);
             break;
         case 1:
+            changeDepth(0);
             changeAction = &changeDepth;
-            medusaDisplay.writeDisplay(depth);
             break;
         case 2:
+            changeWave(0);
             changeAction = &changeWave;
-            medusaDisplay.writeDisplay(wave);
             break;
         case 3:
-
+            changeMultiplier(0);
+            changeAction = &changeMultiplier;
             break;
         case 4:
-
+            changeModulation(0);
+            changeAction =  &changeModulation;
             break;
         default:
 
