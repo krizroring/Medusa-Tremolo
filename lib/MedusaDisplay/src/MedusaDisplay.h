@@ -78,7 +78,6 @@ public:
      */
     void writeDisplay(int _num);
 
-
     void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
 protected:
     uint8_t i2c_addr;

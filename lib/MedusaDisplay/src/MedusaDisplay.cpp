@@ -207,6 +207,7 @@ void MedusaDisplay::blinkRate(uint8_t _b) {
 
 void MedusaDisplay::writeDisplay(char _word[]) {
     // add option to automaticly pad array if shorter then 4
+
     for (uint8_t i=0; i<4; i++) {
         display_buffer[i] = pgm_read_word(alphafonttable+_word[i]);
     }
@@ -238,6 +239,8 @@ void MedusaDisplay::writeDisplay(int _num) {
     display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
     flushBuffer();
 }
+
+
 
 void MedusaDisplay::flushBuffer(void) {
   Wire.beginTransmission(i2c_addr);
