@@ -23,7 +23,7 @@
 #define MIN_MOD 0
 #define MAX_MOD 10
 #define MIN_MULTI 0
-#define MAX_MULTI 5
+#define MAX_MULTI 4
 
 #define MIN_LDR_DEPTH 255
 #define MAX_LDR_DEPTH 0
@@ -82,6 +82,7 @@ protected:
     int period;
     int periodMultiplied;
     int newPeriodMultiplied;
+    int lfoPeriod;
     unsigned long firstPeriod;
     unsigned int halfMultipliedPeriod;
     unsigned long currentMillis;

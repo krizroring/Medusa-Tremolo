@@ -11,6 +11,7 @@
 #include "MedusaDisplay.h"
 
 static const float multiplier_table[] PROGMEM =  { 0.25, 0.5, 1, 2, 4};
+static const float LFO_OFFSET = PI / 8; //  tweak for best sound
 
 WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _mod) {
     depth = _depth;
@@ -44,7 +45,7 @@ int WaveGenerator::generate() {
 
 void WaveGenerator::setBPM(int _bpm) {
     period = BPM_2_PERIOD(_bpm);
-    newPeriodMultiplied = period * multiplier;
+    newPeriodMultiplied = period / multiplier;
 
     updatePeriod();
 };
@@ -75,7 +76,8 @@ int WaveGenerator::updateMultiplier(int _modifier) {
     multi += _modifier;
     multi = constrain(multi, MIN_MULTI, MAX_MULTI);
     multiplier = pgm_read_float(multiplier_table+multi);
-    updatePeriod();
+
+    setBPM(bpm);
 
     return multi;
 }
@@ -100,6 +102,8 @@ void WaveGenerator::updatePeriod() {
     halfMultipliedPeriod = newPeriodMultiplied / 2;
 
     periodMultiplied = newPeriodMultiplied;
+
+    lfoPeriod = period * lfo;
 }
 // actually cos so we're on at period start
 int WaveGenerator::waveSin(unsigned int _offset) {
@@ -133,8 +137,9 @@ int WaveGenerator::waveReverseSaw(unsigned int _offset) {
 }
 
 float WaveGenerator::generateLFO() {
-    unsigned int modOffset = (currentMillis - firstPeriod) % (period * lfo);
+    unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod;
     // generate the mod rad
-    float modRads = ((float)modOffset / (float)(period * lfo)) * TWO_PI;
-    return cos(modRads + 11.125) * (mod * 2) / 2.0; // magic numbers :)
+    float modRads = ((float)modOffset / (float)lfoPeriod ) * TWO_PI;
+
+    return cos(modRads + LFO_OFFSET) * mod; // magic numbers :)
 }
