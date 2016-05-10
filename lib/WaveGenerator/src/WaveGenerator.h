@@ -28,6 +28,8 @@
 #define MIN_LDR_DEPTH 255
 #define MAX_LDR_DEPTH 0
 
+// add the expression functions
+
 class WaveGenerator
 {
 public:

@@ -15,10 +15,15 @@ public:
     // add the boot animation?
 
     PoseidonMenu(MedusaDisplay *);
+    void displayName();
     void next();
     void prev();
     void displayCurrentMenu();
     int getSelectedMenu();
+
+    void displayWave(int);
+    void displayMultiplier(int);
+    void displayExpression(int);
 protected:
     int menuIndex;
     char buffer[5];

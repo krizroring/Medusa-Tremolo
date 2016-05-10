@@ -12,22 +12,7 @@
 // definitions for the encoder modifiers
 #define NEXT 1
 #define PREV -1
-
-// display names for functions
-const char WAVE_SINE[] PROGMEM = "SINE";
-const char WAVE_SQR[] PROGMEM = "SQR ";
-const char WAVE_TRI[] PROGMEM = "TRI ";
-const char WAVE_SAW[] PROGMEM = "SAW ";
-const char WAVE_RSAW[] PROGMEM = "RSAW";
-const char WAVE_TSAW[] PROGMEM = "TSAW";
-const char MULT_0[] PROGMEM = "1/4X";
-const char MULT_1[] PROGMEM = "1/2X";
-const char MULT_2[] PROGMEM = "  1X";
-const char MULT_3[] PROGMEM = "  2X";
-const char MULT_4[] PROGMEM = "  4X";
-
-const char* const WAVE_NAMES[] PROGMEM = { WAVE_SINE, WAVE_SQR, WAVE_TRI, WAVE_SAW, WAVE_RSAW, WAVE_TSAW };
-const char* const MULTI_NAMES[] PROGMEM = { MULT_0, MULT_1, MULT_2, MULT_3, MULT_4 };
+#define EXP 3
 
 // initial values
 int bpm = 120;
@@ -35,6 +20,8 @@ int depth = 100; // maximum depth
 int wave = 0; // sine wave
 int mult = 2; // 1x multiplier
 int mod = 0; // no modulation
+
+int expression = 0;
 
 // encoder select button
 int button_pin = 3;
@@ -46,9 +33,6 @@ Rotary r = Rotary(2, 4);
 WaveGenerator waveGenerator = WaveGenerator(bpm, depth, wave, mult, mod);
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
-
-//TODO move to poseidon menu
-char pedalName[] = "   POSEIDON   ";
 
 // menu states
 boolean isMenu = true;
@@ -73,18 +57,12 @@ void changeDepth(int _direction) {
 
 void changeWave(int _direction) {
     wave = waveGenerator.updateWave(_direction);
-
-    char _buffer[5];
-    strcpy_P(_buffer, (char*)pgm_read_word(&(WAVE_NAMES[wave])));
-    medusaDisplay.writeDisplay(_buffer);
+    poseidonMenu.displayWave(wave);
 }
 
 void changeMultiplier(int _direction) {
     mult = waveGenerator.updateMultiplier(_direction);
-
-    char _buffer[5];
-    strcpy_P(_buffer, (char*)pgm_read_word(&(MULTI_NAMES[mult])));
-    medusaDisplay.writeDisplay(_buffer);
+    poseidonMenu.displayMultiplier(mult);
 }
 
 void changeModulation(int _direction) {
@@ -92,7 +70,14 @@ void changeModulation(int _direction) {
     medusaDisplay.writeDisplay(mod);
 }
 
-void (*actionFN[5])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier,&changeModulation};
+void changeExpression(int _direction) {
+    expression += _direction;
+
+    expression = constrain(expression, 0, EXP);
+    poseidonMenu.displayExpression(expression);
+}
+
+void (*actionFN[6])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier,&changeModulation, &changeExpression};
 
 void menuItemSelected(int _selectedMenuItem)
 {
@@ -112,9 +97,7 @@ void setup()
 
     pinMode(button_pin, INPUT_PULLUP);
 
-    // bootAnimation();
-    // delay(1000);
-    poseidonMenu.displayCurrentMenu();
+    poseidonMenu.displayName();
 
     // set the prescaler for the PWN output (~30 kHz)
     TCCR1B = _BV(CS10);
@@ -167,24 +150,4 @@ void loop() {
         Serial.println(output);
     // }
 
-}
-
-void bootAnimation()
-{
-    delay(1000);
-    int counter =0;
-    char buf[4];
-    while (counter < 11) {
-        buf[0] = pedalName[counter];
-        buf[1] = pedalName[counter + 1];
-        buf[2] = pedalName[counter + 2];
-        buf[3] = pedalName[counter + 3];
-
-        medusaDisplay.writeDisplay(buf);
-        counter ++;
-
-        delay(200);
-    }
-
-    medusaDisplay.clear();
 }
