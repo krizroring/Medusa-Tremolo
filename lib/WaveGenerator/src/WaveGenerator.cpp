@@ -28,6 +28,7 @@ WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _m
     waveFn[2] = &WaveGenerator::waveTri;
     waveFn[3] = &WaveGenerator::waveSaw;
     waveFn[4] = &WaveGenerator::waveReverseSaw;
+    waveFn[5] = &WaveGenerator::waveTriSaw;
 
     updateDepth(0);
     updateBPM(_bpm);
@@ -62,7 +63,6 @@ int WaveGenerator::updateDepth(int _modifier) {
     depth = constrain(depth, MIN_DEPTH, MAX_DEPTH);
 
     ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
-    // check if MAX LDR = 0 and MIN LDR = 255
     return depth;
 }
 int WaveGenerator::updateWave(int _modifier) {
@@ -100,11 +100,13 @@ void WaveGenerator::updatePeriod() {
     firstPeriod = currentMillis - effectiveNewOffset;
 
     halfMultipliedPeriod = newPeriodMultiplied / 2;
+    threeQuarterMultipliedPeriod = (newPeriodMultiplied / 4) + halfMultipliedPeriod;
 
     periodMultiplied = newPeriodMultiplied;
 
     lfoPeriod = period * lfo;
 }
+
 // actually cos so we're on at period start
 int WaveGenerator::waveSin(unsigned int _offset) {
     float rads = ((float)_offset / (float)periodMultiplied) * TWO_PI;
@@ -136,10 +138,19 @@ int WaveGenerator::waveReverseSaw(unsigned int _offset) {
   return map(_offset, 0, periodMultiplied - 1, MIN_LDR_DEPTH, ldrDepth);
 }
 
+// TODO test start offset, currently starts on peak
+int WaveGenerator::waveTriSaw(unsigned int _offset) {
+    if(_offset < threeQuarterMultipliedPeriod) {
+        return map(_offset, 0, threeQuarterMultipliedPeriod, MIN_LDR_DEPTH, ldrDepth);
+    } else {
+        return map(_offset, threeQuarterMultipliedPeriod + 1, periodMultiplied - 1, ldrDepth, MIN_LDR_DEPTH);
+    }
+}
+
 float WaveGenerator::generateLFO() {
     unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod;
     // generate the mod rad
     float modRads = ((float)modOffset / (float)lfoPeriod ) * TWO_PI;
 
-    return cos(modRads + LFO_OFFSET) * mod; // magic numbers :)
+    return cos(modRads + LFO_OFFSET) * mod; // magic numbers: LFO_OFFSET (1/8 of the 1 PI perdiod)
 }

@@ -19,7 +19,7 @@
 #define MIN_DEPTH 0
 #define MAX_DEPTH 100
 #define MIN_WAVE 0
-#define MAX_WAVE 4
+#define MAX_WAVE 5
 #define MIN_MOD 0
 #define MAX_MOD 10
 #define MIN_MULTI 0
@@ -85,6 +85,7 @@ protected:
     int lfoPeriod;
     unsigned long firstPeriod;
     unsigned int halfMultipliedPeriod;
+    unsigned int threeQuarterMultipliedPeriod;
     unsigned long currentMillis;
 
     void updatePeriod();
@@ -94,8 +95,9 @@ protected:
     int waveTri(unsigned int);
     int waveSaw(unsigned int);
     int waveReverseSaw(unsigned int);
+    int waveTriSaw(unsigned int);
 
-    int (WaveGenerator::*waveFn[5])(unsigned int);
+    int (WaveGenerator::*waveFn[6])(unsigned int);
 
     float generateLFO();
 };
