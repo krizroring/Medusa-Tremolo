@@ -44,6 +44,14 @@ int WaveGenerator::generate() {
     return constrain((this->*waveFn[wave])(offset) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
 };
 
+int WaveGenerator::setTappedBPM(int _bpm) {
+    bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
+    
+    firstPeriod = millis();
+    setBPM(bpm);
+    return bpm;
+}
+
 void WaveGenerator::setBPM(int _bpm) {
     period = BPM_2_PERIOD(_bpm);
     newPeriodMultiplied = period / multiplier;
@@ -110,7 +118,6 @@ void WaveGenerator::updatePeriod() {
 // actually cos so we're on at period start
 int WaveGenerator::waveSin(unsigned int _offset) {
     float rads = ((float)_offset / (float)periodMultiplied) * TWO_PI;
-
     return constrain((cos(rads) + 1.0) * (MIN_LDR_DEPTH - ldrDepth) / 2.0 + ldrDepth, MAX_LDR_DEPTH, MIN_LDR_DEPTH); //cap at 255 instead of 256
 }
 
@@ -138,7 +145,6 @@ int WaveGenerator::waveReverseSaw(unsigned int _offset) {
   return map(_offset, 0, periodMultiplied - 1, MIN_LDR_DEPTH, ldrDepth);
 }
 
-// TODO test start offset, currently starts on peak
 int WaveGenerator::waveTriSaw(unsigned int _offset) {
     if(_offset < threeQuarterMultipliedPeriod) {
         return map(_offset, 0, threeQuarterMultipliedPeriod, MIN_LDR_DEPTH, ldrDepth);
@@ -151,6 +157,5 @@ float WaveGenerator::generateLFO() {
     unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod;
     // generate the mod rad
     float modRads = ((float)modOffset / (float)lfoPeriod ) * TWO_PI;
-
     return cos(modRads + LFO_OFFSET) * mod; // magic numbers: LFO_OFFSET (1/8 of the 1 PI perdiod)
 }

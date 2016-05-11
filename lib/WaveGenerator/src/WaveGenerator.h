@@ -52,6 +52,10 @@ public:
      */
      int generate();
      /**
+     Sets a new BPM and resets the first period
+     */
+     int setTappedBPM(int);
+     /**
      Increases or decreases the BPM
      */
      int updateBPM(int);
