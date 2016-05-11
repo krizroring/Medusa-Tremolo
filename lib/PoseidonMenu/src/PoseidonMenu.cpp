@@ -59,7 +59,6 @@ PoseidonMenu::PoseidonMenu(MedusaDisplay *_display) {
 
 void PoseidonMenu::displayName() {
     // delay(500);
-
     int counter =0;
     while (counter < 11) {
         buffer[0] = PEDAL_NAME[counter];
