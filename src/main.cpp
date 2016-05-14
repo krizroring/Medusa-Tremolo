@@ -9,28 +9,39 @@
 #include "MedusaDisplay.h"
 #include "PoseidonMenu.h"
 
-// definitions for the encoder modifiers
+// definitions
 #define NEXT 1
 #define PREV -1
 #define EXP 3
 
+#define LDR_PIN 9
+#define STATUS_PIN 10
+#define BUTTON_PIN 6
+#define EXP_PIN A0
+
+#define READ_INTERVAL 50
+
 // initial values
-int bpm = 120;
+int bpm = 60;
 int depth = 100; // maximum depth
-int wave = 0; // sine wave
+int wave = 2; // sine wave
 int mult = 2; // 1x multiplier
 int mod = 0; // no modulation
 
 int expression = 0;
 
+int brightness = 1;
+
+int readThreshold = 10;
+int expressionValue = -100;
+
 // encoder select button
-int button_pin = 3;
 int buttonState = 0;
 int debounce = 0;
 
 // library instantiation
-Rotary r = Rotary(2, 4);
-WaveGenerator waveGenerator = WaveGenerator(bpm, depth, wave, mult, mod);
+Rotary r = Rotary(5, 7);
+WaveGenerator waveGenerator = WaveGenerator(bpm, depth, wave, mult, mod, 0);
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
 
@@ -41,9 +52,8 @@ boolean isActive = true;
 // the final outpu value to the vactrol / LDR
 int output = 0;
 
+void (*buttonAction)();
 void (*changeAction)(int);
-
-void bootAnimation();
 
 void changeBPM(int _direction) {
     bpm = waveGenerator.updateBPM(_direction);
@@ -77,7 +87,24 @@ void changeExpression(int _direction) {
     poseidonMenu.displayExpression(expression);
 }
 
-void (*actionFN[6])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier,&changeModulation, &changeExpression};
+void loadSettings(int _direction) {
+
+
+}
+
+void saveSettings(int _direction) {
+
+
+}
+// changes the brightness of the display 1-4
+void changeBrightness(int _direction) {
+    brightness = medusaDisplay.updateBrightness(_direction);
+    medusaDisplay.writeDisplay(brightness);
+}
+
+
+void (*actionFN[9])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier,&changeModulation,
+    &changeExpression, &loadSettings, &saveSettings, &changeBrightness};
 
 void menuItemSelected(int _selectedMenuItem)
 {
@@ -85,38 +112,60 @@ void menuItemSelected(int _selectedMenuItem)
     (*changeAction)(0);
 }
 
+void menuSelectAction();
+void valueSetAction();
+
+void menuSelectAction() {
+    menuItemSelected(poseidonMenu.getSelectedMenu());
+
+    // TODO find better way for state
+    isMenu = false;
+    buttonAction = &valueSetAction;
+    // add custom handler for config
+}
+
+void valueSetAction() {
+    //add save option here
+
+    poseidonMenu.displayCurrentMenu();
+    isMenu = true;
+    buttonAction = &menuSelectAction;
+}
+
+
+
 void setup()
 {
     Serial.begin(9600);
 
-    pinMode(9, OUTPUT);
-    pinMode(10, OUTPUT);
+    pinMode(LDR_PIN, OUTPUT);
+    pinMode(STATUS_PIN, OUTPUT);
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(EXP_PIN, INPUT);
 
     medusaDisplay.begin(0x70, 1);
-    medusaDisplay.clear();
 
-    pinMode(button_pin, INPUT_PULLUP);
+    expressionValue = analogRead(EXP_PIN);
+
+    //set the button action to be the menu
+    buttonAction = &menuSelectAction;
 
     poseidonMenu.displayName();
+
 
     // set the prescaler for the PWN output (~30 kHz)
     TCCR1B = _BV(CS10);
 }
 
+unsigned long lastPotRead = millis();
+
 void loop() {
-    buttonState = digitalRead(button_pin);
+    unsigned long currentMillis = millis();
+
+    buttonState = digitalRead(BUTTON_PIN);
 
     if (buttonState == LOW && debounce == 0) {
-        if (isMenu) {
-            isMenu = false;
-            menuItemSelected(poseidonMenu.getSelectedMenu());
-        } else {
-            medusaDisplay.blinkRate(HT16K33_BLINK_2HZ);
-            delay(1000);
-            medusaDisplay.blinkRate(HT16K33_BLINK_OFF);
-            poseidonMenu.displayCurrentMenu();
-            isMenu = true;
-        }
+        (*buttonAction)();
 
         debounce = 1;
     }
@@ -125,6 +174,7 @@ void loop() {
     }
 
     unsigned char result = r.process();
+
     if(result != DIR_NONE){
         if(isMenu) {
             if (result == DIR_CW) {
@@ -141,13 +191,29 @@ void loop() {
         }
     }
 
+
+    if(currentMillis > lastPotRead + READ_INTERVAL) {
+        int temp =  analogRead(EXP_PIN);
+
+        temp = constrain(temp, 30, 900);
+        // Serial.println(temp);
+        if ((temp > expressionValue + readThreshold) || (temp < expressionValue - readThreshold)) {
+            expressionValue = map(temp, 30, 900, 0, 100);
+
+        }
+
+        Serial.println(expressionValue);
+
+        lastPotRead = currentMillis;
+    }
+
     int _output = waveGenerator.generate();
 
     // if (output != _output){
         output = _output;
-        analogWrite(9, output);
-        analogWrite(10, output);
-        Serial.println(output);
+        analogWrite(LDR_PIN, output);
+        analogWrite(STATUS_PIN, output);
+        // Serial.println(output);
     // }
 
 }
