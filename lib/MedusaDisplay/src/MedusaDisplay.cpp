@@ -166,7 +166,7 @@ static const uint16_t alphafonttable[] PROGMEM =  {
 
 MedusaDisplay::MedusaDisplay(void){};
 
-void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 2) {
+void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 1) {
   i2c_addr = _addr;
 
   Wire.begin();
@@ -177,6 +177,8 @@ void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 2) {
   blinkRate(HT16K33_BLINK_OFF);
 
   setBrightness(_b);
+
+  clear();
 }
 
 void MedusaDisplay::clear(void) {
@@ -189,11 +191,17 @@ void MedusaDisplay::clear(void) {
 
 void MedusaDisplay::setBrightness(uint8_t _b) {
     Wire.beginTransmission(i2c_addr);
+    brightness = _b;
 
-    if (_b > 4) _b = 4;
     Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
-
     Wire.endTransmission();
+}
+
+int MedusaDisplay::updateBrightness(int _direction) {
+    brightness += _direction;
+    brightness = constrain(brightness, 1, 4);
+    setBrightness(brightness);
+    return brightness;
 }
 
 void MedusaDisplay::blinkRate(uint8_t _b) {
