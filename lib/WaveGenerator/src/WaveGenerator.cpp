@@ -13,12 +13,14 @@
 static const float multiplier_table[] PROGMEM =  { 0.25, 0.5, 1, 2, 4};
 static const float LFO_OFFSET = PI / 8; //  tweak for best sound
 
-WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _mod) {
+WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _mod, int _tremOff) {
     depth = _depth;
     wave = _wave;
     multi = _multi;
     mod = _mod;
     lfo = 8;
+
+    tremOff = _tremOff;
 
     multiplier = pgm_read_float(multiplier_table+multi);
     firstPeriod = millis();
@@ -35,18 +37,22 @@ WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _m
 };
 
 int WaveGenerator::generate() {
-    currentMillis = millis();
-    int offset = (currentMillis - firstPeriod) % periodMultiplied;
+    if (tremOff == 0) {
+        currentMillis = millis();
+        int offset = (currentMillis - firstPeriod) % periodMultiplied;
 
-    float modulation = 0.0;
-    if (mod > 0.0) modulation = generateLFO();
+        float modulation = 0.0;
+        if (mod > 0.0) modulation = generateLFO();
 
-    return constrain((this->*waveFn[wave])(offset) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
+        return constrain((this->*waveFn[wave])(offset) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
+    } else {
+        return ldrDepth;
+    }
 };
 
 int WaveGenerator::setTappedBPM(int _bpm) {
     bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
-    
+
     firstPeriod = millis();
     setBPM(bpm);
     return bpm;
@@ -96,6 +102,10 @@ int WaveGenerator::updateModulation(int _modifier) {
     return mod;
 }
 
+int WaveGenerator::setTremOff(int _tremOff) {
+    tremOff = (boolean)_tremOff;
+    return tremOff;
+}
 //Private functions
 
 void WaveGenerator::updatePeriod() {

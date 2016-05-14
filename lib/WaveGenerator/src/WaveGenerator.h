@@ -40,8 +40,9 @@ public:
      @param int _wave Pointer to the wave type.
      @param int _multi The multiplier.
      @param int _mod The modulation value.
+     @param boolean _tremOff Trem or volume mode.
      */
-     WaveGenerator(int, int, int, int, int);
+     WaveGenerator(int, int, int, int, int, int);
 
      /**
      Updates the bpm
@@ -75,6 +76,10 @@ public:
      Increases or decreases the modulation
      */
      int updateModulation(int);
+     /**
+     Sets the tremolo in tremolo or volume mode
+     */
+     int setTremOff(int);
 protected:
     int bpm;
     int depth;
@@ -82,6 +87,8 @@ protected:
     int multi;
     int mod;
     unsigned int lfo;
+
+    int tremOff;
 
     int ldrDepth;
     float multiplier;
