@@ -13,15 +13,13 @@ const char item2[5] PROGMEM = "WAVE";
 const char item3[5] PROGMEM = "MULT";
 const char item4[5] PROGMEM = "MOD ";
 const char item5[5] PROGMEM = "EXP ";
-const char item6[5] PROGMEM = "P  1";
-const char item7[5] PROGMEM = "P  2";
-const char item8[5] PROGMEM = "P  3";
-const char item9[5] PROGMEM = "P  4";
-const char item10[5] PROGMEM = "DISP";
-const char item11[5] PROGMEM = "CAL ";
-const char item12[5] PROGMEM = "MODE";
+const char item6[5] PROGMEM = "LOAD";
+const char item7[5] PROGMEM = "SAVE";
+const char item8[5] PROGMEM = "DISP";
+const char item9[5] PROGMEM = "CAL ";
+const char item10[5] PROGMEM = "MODE";
 const char* const MENU_NAMES[] PROGMEM = {
-    item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12 };
+    item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10};
 
 const char WAVE_SINE[] PROGMEM = "SINE";
 const char WAVE_SQR[] PROGMEM = "SQR ";
@@ -48,7 +46,17 @@ const char EXP_3[] PROGMEM = "MULT";
 const char* const EXP_NAMES[] PROGMEM = {
     EXP_0, EXP_1, EXP_2, EXP_3};
 
-static const int MENU_LENGTH = 13;
+const char CAL_0[] PROGMEM = "MIN ";
+const char CAL_1[] PROGMEM = "MAX ";
+const char* const CAL_NAMES[] PROGMEM = {
+    CAL_0, CAL_1};
+
+const char MODE_0[] PROGMEM = "TREM";
+const char MODE_1[] PROGMEM = "VOL ";
+const char* const MODE_NAMES[] PROGMEM = {
+    MODE_0, MODE_1};
+
+static const int MENU_LENGTH = 11;
 
 static const char PEDAL_NAME[] = "   POSEIDON   ";
 
@@ -113,5 +121,15 @@ void PoseidonMenu::displayMultiplier(int _multi) {
 
 void PoseidonMenu::displayExpression(int _exp) {
     strcpy_P(buffer, (char*)pgm_read_word(&(EXP_NAMES[_exp])));
+    (*display).writeDisplay(buffer);
+}
+
+void PoseidonMenu::displayCalibration(int _cal) {
+    strcpy_P(buffer, (char*)pgm_read_word(&(CAL_NAMES[_cal])));
+    (*display).writeDisplay(buffer);
+}
+
+void PoseidonMenu::displayMode(int _mode) {
+    strcpy_P(buffer, (char*)pgm_read_word(&(MODE_NAMES[_mode])));
     (*display).writeDisplay(buffer);
 }

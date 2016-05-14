@@ -24,6 +24,8 @@ public:
     void displayWave(int);
     void displayMultiplier(int);
     void displayExpression(int);
+    void displayCalibration(int);
+    void displayMode(int);
 protected:
     int menuIndex;
     char buffer[5];
