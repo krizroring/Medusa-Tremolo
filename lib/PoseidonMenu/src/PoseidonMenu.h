@@ -1,5 +1,5 @@
 /*
- * Poseidon.h - Menu for the Poseidon Tremolo
+ * PoseidonMenu.h - Menu for the Poseidon Tremolo
  * Copyright 2016 Christian Roring
  */
 

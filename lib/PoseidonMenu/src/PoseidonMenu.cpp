@@ -7,19 +7,19 @@
 #include "PoseidonMenu.h"
 #include "MedusaDisplay.h"
 
-const char item0[5] PROGMEM = "BPM ";
-const char item1[5] PROGMEM = "DEPT";
-const char item2[5] PROGMEM = "WAVE";
-const char item3[5] PROGMEM = "MULT";
-const char item4[5] PROGMEM = "MOD ";
-const char item5[5] PROGMEM = "EXP ";
-const char item6[5] PROGMEM = "LOAD";
-const char item7[5] PROGMEM = "SAVE";
-const char item8[5] PROGMEM = "DISP";
-const char item9[5] PROGMEM = "CAL ";
-const char item10[5] PROGMEM = "MODE";
+const char MENU_1[] PROGMEM = "BPM ";
+const char MENU_2[] PROGMEM = "DEPT";
+const char MENU_3[] PROGMEM = "WAVE";
+const char MENU_4[] PROGMEM = "MULT";
+const char MENU_5[] PROGMEM = "MOD ";
+const char MENU_6[] PROGMEM = "EXP ";
+const char MENU_7[] PROGMEM = "LOAD";
+const char MENU_8[] PROGMEM = "SAVE";
+const char MENU_9[] PROGMEM = "DISP";
+const char MENU_10[] PROGMEM = "CAL ";
+const char MENU_11[] PROGMEM = "MODE";
 const char* const MENU_NAMES[] PROGMEM = {
-    item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10};
+    MENU_1, MENU_2, MENU_3, MENU_4, MENU_5, MENU_6, MENU_7, MENU_8, MENU_9, MENU_10, MENU_11};
 
 const char WAVE_SINE[] PROGMEM = "SINE";
 const char WAVE_SQR[] PROGMEM = "SQR ";
