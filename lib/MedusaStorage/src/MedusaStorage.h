@@ -7,6 +7,7 @@
 #define MEDUSA_STORAGE_H
 
 #include "Arduino.h"
+#include "Wire.h"
 
 // use struct for settings object
 // use struct for config object
@@ -15,19 +16,12 @@
 class MedusaStorage
 {
 public:
-    MedusaStorage();
+    MedusaStorage(int _deviceAddress);
 
-    void saveSettings();
-    void loadSettings();
-
-    void saveConfiguration();
-    void loadConfiguration();
+    void saveSetting(unsigned int _addr, byte _data);
+    byte loadSetting(unsigned int _addr);
 protected:
-    int settingsOffset;
-    int settingsLength;
-
-    int configPosition;
-    int configLength;
+    int deviceAddress;
 };
 
 #endif
