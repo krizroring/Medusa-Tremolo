@@ -169,7 +169,6 @@ MedusaDisplay::MedusaDisplay(void){};
 void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 1) {
   i2c_addr = _addr;
 
-  Wire.begin();
   Wire.beginTransmission(i2c_addr);
   Wire.write(0x21);  // turn on oscillator
   Wire.endTransmission();
@@ -197,7 +196,7 @@ void MedusaDisplay::setBrightness(uint8_t _b) {
     Wire.endTransmission();
 }
 
-int MedusaDisplay::updateBrightness(int _direction) {
+byte MedusaDisplay::updateBrightness(int _direction) {
     brightness += _direction;
     brightness = constrain(brightness, 1, 4);
     setBrightness(brightness);
@@ -247,8 +246,6 @@ void MedusaDisplay::writeDisplay(int _num) {
     display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
     flushBuffer();
 }
-
-
 
 void MedusaDisplay::flushBuffer(void) {
   Wire.beginTransmission(i2c_addr);

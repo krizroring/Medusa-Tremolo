@@ -56,7 +56,7 @@ public:
      * _b The brightness (0-4)
      */
     void setBrightness(uint8_t _b);
-    int updateBrightness(int);
+    byte updateBrightness(int);
     /*
      * Sets the blink rate of the display
      * _b The blink rate (0-3)
@@ -83,7 +83,7 @@ public:
 protected:
     uint8_t i2c_addr;
     uint16_t display_buffer[4];
-    int brightness;
+    byte brightness;
 
     void flushBuffer(void);
 };
