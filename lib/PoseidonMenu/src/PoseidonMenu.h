@@ -25,7 +25,7 @@ public:
     void displayMultiplier(int);
     void displayExpression(int);
     void displayCalibration(int);
-    void displayMode(int);
+    void displayPedalMode(int);
 protected:
     int menuIndex;
     char buffer[5];

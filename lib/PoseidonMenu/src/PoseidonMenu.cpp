@@ -18,6 +18,7 @@ const char MENU_8[] PROGMEM = "SAVE";
 const char MENU_9[] PROGMEM = "DISP";
 const char MENU_10[] PROGMEM = "CAL ";
 const char MENU_11[] PROGMEM = "MODE";
+
 const char* const MENU_NAMES[] PROGMEM = {
     MENU_1, MENU_2, MENU_3, MENU_4, MENU_5, MENU_6, MENU_7, MENU_8, MENU_9, MENU_10, MENU_11};
 
@@ -67,18 +68,18 @@ PoseidonMenu::PoseidonMenu(MedusaDisplay *_display) {
 
 void PoseidonMenu::displayName() {
     // delay(500);
-    int counter =0;
-    while (counter < 11) {
-        buffer[0] = PEDAL_NAME[counter];
-        buffer[1] = PEDAL_NAME[counter + 1];
-        buffer[2] = PEDAL_NAME[counter + 2];
-        buffer[3] = PEDAL_NAME[counter + 3];
-
-        (*display).writeDisplay(buffer);
-        counter ++;
-
-        delay(200);
-    }
+    // int counter =0;
+    // while (counter < 11) {
+    //     buffer[0] = PEDAL_NAME[counter];
+    //     buffer[1] = PEDAL_NAME[counter + 1];
+    //     buffer[2] = PEDAL_NAME[counter + 2];
+    //     buffer[3] = PEDAL_NAME[counter + 3];
+    //
+    //     (*display).writeDisplay(buffer);
+    //     counter ++;
+    //
+    //     delay(200);
+    // }
 
     displayCurrentMenu();
 }
@@ -129,7 +130,7 @@ void PoseidonMenu::displayCalibration(int _cal) {
     (*display).writeDisplay(buffer);
 }
 
-void PoseidonMenu::displayMode(int _mode) {
+void PoseidonMenu::displayPedalMode(int _mode) {
     strcpy_P(buffer, (char*)pgm_read_word(&(MODE_NAMES[_mode])));
     (*display).writeDisplay(buffer);
 }
