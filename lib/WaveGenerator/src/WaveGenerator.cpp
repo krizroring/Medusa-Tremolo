@@ -13,16 +13,9 @@
 static const float multiplier_table[] PROGMEM =  { 0.25, 0.5, 1, 2, 4};
 static const float LFO_OFFSET = PI / 8; //  tweak for best sound
 
-WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _mod, int _tremOff) {
-    depth = _depth;
-    wave = _wave;
-    multi = _multi;
-    mod = _mod;
-    lfo = 8;
+WaveGenerator::WaveGenerator() {
+    lfo = 8; // param or config?
 
-    tremOff = _tremOff;
-
-    multiplier = pgm_read_float(multiplier_table+multi);
     firstPeriod = millis();
 
     waveFn[0] = &WaveGenerator::waveSin;
@@ -31,13 +24,24 @@ WaveGenerator::WaveGenerator(int _bpm, int _depth, int _wave, int _multi, int _m
     waveFn[3] = &WaveGenerator::waveSaw;
     waveFn[4] = &WaveGenerator::waveReverseSaw;
     waveFn[5] = &WaveGenerator::waveTriSaw;
-
-    updateDepth(0);
-    updateBPM(_bpm);
 };
 
+void WaveGenerator::setParams(byte _bpm, byte _depth, byte _wave, byte _multi, byte _mod, byte _pedalMode) {
+    bpm = _bpm;
+    depth = _depth;
+    wave = _wave;
+    multi = _multi;
+    mod = _mod;
+    pedalMode = _pedalMode;
+
+    multiplier = pgm_read_float(multiplier_table+multi);
+
+    setDepth(depth);
+    setTappedBPM(bpm);
+}
+
 int WaveGenerator::generate() {
-    if (tremOff == 0) {
+    if (pedalMode == 0) {
         currentMillis = millis();
         int offset = (currentMillis - firstPeriod) % periodMultiplied;
 
@@ -50,7 +54,7 @@ int WaveGenerator::generate() {
     }
 };
 
-int WaveGenerator::setTappedBPM(int _bpm) {
+byte WaveGenerator::setTappedBPM(byte _bpm) {
     bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
 
     firstPeriod = millis();
@@ -58,37 +62,59 @@ int WaveGenerator::setTappedBPM(int _bpm) {
     return bpm;
 }
 
-void WaveGenerator::setBPM(int _bpm) {
+void WaveGenerator::setBPM(byte _bpm) {
     period = BPM_2_PERIOD(_bpm);
     newPeriodMultiplied = period / multiplier;
 
     updatePeriod();
 };
 
-int WaveGenerator::updateBPM(int _modifier) {
-    bpm += _modifier;
-    bpm = constrain(bpm, MIN_BPM, MAX_BPM);
+byte WaveGenerator::updateBPM(int _modifier) {
+    int _tmp = bpm + _modifier;
+
+    if(_tmp >= MIN_BPM && _tmp <= MAX_BPM) {
+        bpm = _tmp;
+    }
+
     setBPM(bpm);
     return bpm;
 }
 
 int WaveGenerator::updateDepth(int _modifier) {
-    depth += _modifier;
-    depth = constrain(depth, MIN_DEPTH, MAX_DEPTH);
+    int _tmp = depth + _modifier;
 
+    if(_tmp >= MIN_DEPTH && _tmp <= MAX_DEPTH) {
+        depth = _tmp;
+    }
+
+    // ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
+    return setDepth(depth);
+}
+int WaveGenerator::setDepth(byte _depth) {
+    // map exp to 256 ??
+    depth = _depth;
     ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return depth;
 }
+
 int WaveGenerator::updateWave(int _modifier) {
-    wave += _modifier;
-    wave = constrain(wave, MIN_WAVE, MAX_WAVE);
+    int _tmp = wave + _modifier;
+
+    if(_tmp >= MIN_WAVE && _tmp <= MAX_WAVE) {
+        wave = _tmp;
+    }
+
     updatePeriod();
 
     return wave;
 }
 int WaveGenerator::updateMultiplier(int _modifier) {
-    multi += _modifier;
-    multi = constrain(multi, MIN_MULTI, MAX_MULTI);
+    int _tmp = multi + _modifier;
+
+    if(_tmp >= MIN_MULTI && _tmp <= MAX_MULTI) {
+        multi = _tmp;
+    }
+
     multiplier = pgm_read_float(multiplier_table+multi);
 
     setBPM(bpm);
@@ -96,15 +122,23 @@ int WaveGenerator::updateMultiplier(int _modifier) {
     return multi;
 }
 int WaveGenerator::updateModulation(int _modifier) {
-    mod += _modifier;
-    mod = constrain(mod, MIN_MOD, MAX_MOD);
+    int _tmp = mod + _modifier;
+
+    if(_tmp >= MIN_MOD && _tmp <= MAX_MOD) {
+        mod = _tmp;
+    }
 
     return mod;
 }
 
-int WaveGenerator::setTremOff(int _tremOff) {
-    tremOff = (boolean)_tremOff;
-    return tremOff;
+int WaveGenerator::setPedalMode(int _modifier) {
+    int _tmp = pedalMode + _modifier;
+
+    if(_tmp >= 0 && _tmp <= 1) {
+        pedalMode = _tmp;
+    }
+
+    return pedalMode;
 }
 //Private functions
 

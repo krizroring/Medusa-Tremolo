@@ -15,7 +15,7 @@
 #define BPM_2_PERIOD(bpm)(60000/bpm)
 
 #define MIN_BPM 60
-#define MAX_BPM 240
+#define MAX_BPM 180
 #define MIN_DEPTH 0
 #define MAX_DEPTH 100
 #define MIN_WAVE 0
@@ -34,20 +34,23 @@ class WaveGenerator
 {
 public:
      /**
-     Initialization function
+     Contructor function
+     */
+     WaveGenerator();
+     /**
+     Sets the parameters
      @param int _bpm The BPM value.
      @param int _depth The depth value.
      @param int _wave Pointer to the wave type.
      @param int _multi The multiplier.
      @param int _mod The modulation value.
-     @param boolean _tremOff Trem or volume mode.
+     @param int _tremOff Trem or Volume mode.
      */
-     WaveGenerator(int, int, int, int, int, int);
-
+     void setParams(byte, byte, byte, byte, byte, byte);
      /**
      Updates the bpm
      */
-     void setBPM(int);
+     void setBPM(byte);
      /**
      Generates the waveform for the wave led (vactrol) and a status led
      */
@@ -55,15 +58,19 @@ public:
      /**
      Sets a new BPM and resets the first period
      */
-     int setTappedBPM(int);
+     byte setTappedBPM(byte);
      /**
      Increases or decreases the BPM
      */
-     int updateBPM(int);
+     byte updateBPM(int);
      /**
      Increases or decreases the Depth
      */
      int updateDepth(int);
+     /**
+     Sets the Depth
+     */
+     int setDepth(byte);
      /**
      Increases or decreases the wave type
      */
@@ -79,16 +86,16 @@ public:
      /**
      Sets the tremolo in tremolo or volume mode
      */
-     int setTremOff(int);
+     int setPedalMode(int);
 protected:
-    int bpm;
-    int depth;
-    int wave;
-    int multi;
-    int mod;
-    unsigned int lfo;
+    byte bpm;
+    byte depth;
+    byte wave;
+    byte multi;
+    byte mod;
+    byte pedalMode;
 
-    int tremOff;
+    unsigned int lfo;
 
     int ldrDepth;
     float multiplier;
