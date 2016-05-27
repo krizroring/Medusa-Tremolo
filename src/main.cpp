@@ -136,8 +136,7 @@ void calibrateExpression(int _direction) {
 
 static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 
-void valueSetAction(int _index) {
-
+void saveParam(int _index) {
     medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
     displayMenu();
 }
@@ -167,14 +166,15 @@ void saveProgram(int _index) {
     displayMenu();
 }
 
+// temp function
 void noop(int _index) {
     displayMenu();
 }
 
 static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
     &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression};
-static void (*buttonFN[])(int) = {&valueSetAction, &valueSetAction, &valueSetAction, &valueSetAction, &valueSetAction,
-    &valueSetAction, &valueSetAction, &loadProgram, &saveProgram, &setBrightness, &noop};
+static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam, &saveParam,
+    &saveParam, &saveParam, &loadProgram, &saveProgram, &setBrightness, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {

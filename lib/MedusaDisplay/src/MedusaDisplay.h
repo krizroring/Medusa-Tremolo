@@ -79,8 +79,6 @@ public:
      */
     void writeDisplay(int _num);
 
-    void writeDigitRaw(uint8_t _n, uint16_t _bitmask); // remove
-
     /*
     * Writes BACK to the display
     */

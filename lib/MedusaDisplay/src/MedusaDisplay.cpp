@@ -213,8 +213,6 @@ void MedusaDisplay::blinkRate(uint8_t _b) {
 }
 
 void MedusaDisplay::writeDisplay(char _word[]) {
-    // add option to automaticly pad array if shorter then 4
-
     for (uint8_t i=0; i<4; i++) {
         display_buffer[i] = pgm_read_word(alphafonttable+_word[i]);
     }
@@ -261,8 +259,4 @@ void MedusaDisplay::flushBuffer(void) {
   }
 
   Wire.endTransmission();
-}
-
-void MedusaDisplay::writeDigitRaw(uint8_t n, uint16_t bitmask) {
-  display_buffer[n] = bitmask;
 }
