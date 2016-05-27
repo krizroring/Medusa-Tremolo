@@ -1,10 +1,10 @@
 /*
- * PoseidonMenu.cpp - Menu for the Poseidon Tremolo
+ * PoseidonTermolo.cpp - Menu for the Poseidon Tremolo
  * 2016 Christian Roring
  */
 
 #include "Arduino.h"
-#include "PoseidonMenu.h"
+#include "PoseidonTermolo.h"
 #include "MedusaDisplay.h"
 
 const char MENU_1[] PROGMEM = "BPM ";
@@ -13,11 +13,11 @@ const char MENU_3[] PROGMEM = "WAVE";
 const char MENU_4[] PROGMEM = "MULT";
 const char MENU_5[] PROGMEM = "MOD ";
 const char MENU_6[] PROGMEM = "EXP ";
-const char MENU_7[] PROGMEM = "LOAD";
-const char MENU_8[] PROGMEM = "SAVE";
-const char MENU_9[] PROGMEM = "DISP";
-const char MENU_10[] PROGMEM = "CAL ";
-const char MENU_11[] PROGMEM = "MODE";
+const char MENU_7[] PROGMEM = "MODE";
+const char MENU_8[] PROGMEM = "LOAD";
+const char MENU_9[] PROGMEM = "SAVE";
+const char MENU_10[] PROGMEM = "DISP";
+const char MENU_11[] PROGMEM = "CAL ";
 
 const char* const MENU_NAMES[] PROGMEM = {
     MENU_1, MENU_2, MENU_3, MENU_4, MENU_5, MENU_6, MENU_7, MENU_8, MENU_9, MENU_10, MENU_11};
@@ -47,6 +47,10 @@ const char EXP_3[] PROGMEM = "MULT";
 const char* const EXP_NAMES[] PROGMEM = {
     EXP_0, EXP_1, EXP_2, EXP_3};
 
+static const int EXP_LENGTH = 4;
+
+static const int PROG_LENGTH = 10;
+
 const char CAL_0[] PROGMEM = "MIN ";
 const char CAL_1[] PROGMEM = "MAX ";
 const char* const CAL_NAMES[] PROGMEM = {
@@ -64,25 +68,10 @@ static const char PEDAL_NAME[] = "   POSEIDON   ";
 PoseidonMenu::PoseidonMenu(MedusaDisplay *_display) {
     menuIndex = 0;
     display = _display;
+
+    expressionMenuLength = EXP_LENGTH;
+    numProgramLength = PROG_LENGTH;
 };
-
-void PoseidonMenu::displayName() {
-    // delay(500);
-    // int counter =0;
-    // while (counter < 11) {
-    //     buffer[0] = PEDAL_NAME[counter];
-    //     buffer[1] = PEDAL_NAME[counter + 1];
-    //     buffer[2] = PEDAL_NAME[counter + 2];
-    //     buffer[3] = PEDAL_NAME[counter + 3];
-    //
-    //     (*display).writeDisplay(buffer);
-    //     counter ++;
-    //
-    //     delay(200);
-    // }
-
-    displayCurrentMenu();
-}
 
 void PoseidonMenu::next() {
     if((menuIndex + 1) < MENU_LENGTH) {
@@ -110,17 +99,17 @@ void PoseidonMenu::writeDisplay() {
     (*display).writeDisplay(buffer);
 }
 
-void PoseidonMenu::displayWave(int _wave) {
+void PoseidonMenu::displayWave(byte _wave) {
     strcpy_P(buffer, (char*)pgm_read_word(&(WAVE_NAMES[_wave])));
     (*display).writeDisplay(buffer);
 }
 
-void PoseidonMenu::displayMultiplier(int _multi) {
+void PoseidonMenu::displayMultiplier(byte _multi) {
     strcpy_P(buffer, (char*)pgm_read_word(&(MULTI_NAMES[_multi])));
     (*display).writeDisplay(buffer);
 }
 
-void PoseidonMenu::displayExpression(int _exp) {
+void PoseidonMenu::displayExpression(byte _exp) {
     strcpy_P(buffer, (char*)pgm_read_word(&(EXP_NAMES[_exp])));
     (*display).writeDisplay(buffer);
 }
@@ -130,7 +119,7 @@ void PoseidonMenu::displayCalibration(int _cal) {
     (*display).writeDisplay(buffer);
 }
 
-void PoseidonMenu::displayPedalMode(int _mode) {
+void PoseidonMenu::displayPedalMode(byte _mode) {
     strcpy_P(buffer, (char*)pgm_read_word(&(MODE_NAMES[_mode])));
     (*display).writeDisplay(buffer);
 }

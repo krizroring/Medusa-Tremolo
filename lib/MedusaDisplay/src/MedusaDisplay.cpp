@@ -247,6 +247,10 @@ void MedusaDisplay::writeDisplay(int _num) {
     flushBuffer();
 }
 
+void MedusaDisplay::writeBack() {
+    writeDisplay("BACK");
+}
+
 void MedusaDisplay::flushBuffer(void) {
   Wire.beginTransmission(i2c_addr);
   Wire.write((uint8_t)0x00); // start at address $00

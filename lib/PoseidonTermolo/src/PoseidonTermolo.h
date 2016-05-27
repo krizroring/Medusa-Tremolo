@@ -1,10 +1,10 @@
 /*
- * PoseidonMenu.h - Menu for the Poseidon Tremolo
+ * PoseidonTermolo.h - Menu for the Poseidon Tremolo
  * Copyright 2016 Christian Roring
  */
 
-#ifndef POSEIDON_MENU_H
-#define POSEIDON_MENU_H
+#ifndef POSEIDON_TREMOLO_H
+#define POSEIDON_TREMOLO_H
 
 #include "Arduino.h"
 #include "MedusaDisplay.h"
@@ -15,22 +15,34 @@ public:
     // add the boot animation?
 
     PoseidonMenu(MedusaDisplay *);
-    void displayName();
     void next();
     void prev();
     void displayCurrentMenu();
     int getSelectedMenu();
 
-    void displayWave(int);
-    void displayMultiplier(int);
-    void displayExpression(int);
+    void displayWave(byte);
+    void displayMultiplier(byte);
+    void displayExpression(byte);
     void displayCalibration(int);
-    void displayPedalMode(int);
+    void displayPedalMode(byte);
+
+    int expressionMenuLength;
+    int numProgramLength;
 protected:
     int menuIndex;
     char buffer[5];
     MedusaDisplay *display;
     void writeDisplay();
+};
+
+class PoseidonFunctions
+{
+public:
+    // add the boot animation?
+
+
+protected:
+
 };
 
 #endif

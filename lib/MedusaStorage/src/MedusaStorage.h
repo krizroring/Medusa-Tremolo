@@ -9,17 +9,31 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-// use struct for settings object
-// use struct for config object
-// use offset for position
-
 class MedusaStorage
 {
 public:
     MedusaStorage(int _deviceAddress);
+    void saveBrightness(byte _brightness);
+    byte loadBrightness();
 
-    void saveSetting(unsigned int _addr, byte _data);
     byte loadSetting(unsigned int _addr);
+    void saveSetting(unsigned int _addr, byte _data);
+
+    /**
+    Loads the selected program
+    @paran int the porgram number
+    @param *byte _data The pointer to the data array
+    */
+    void loadSettings(int, byte *_data);
+
+    /**
+    Saves the selected program
+    @paran int the porgram number
+    @param *byte _data The pointer to the data array
+    */
+    void saveSettings(int, byte *_data);
+
+    int programStart;
 protected:
     int deviceAddress;
 };

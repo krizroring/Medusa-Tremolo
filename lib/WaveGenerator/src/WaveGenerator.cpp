@@ -80,7 +80,7 @@ byte WaveGenerator::updateBPM(int _modifier) {
     return bpm;
 }
 
-int WaveGenerator::updateDepth(int _modifier) {
+byte WaveGenerator::updateDepth(int _modifier) {
     int _tmp = depth + _modifier;
 
     if(_tmp >= MIN_DEPTH && _tmp <= MAX_DEPTH) {
@@ -90,14 +90,14 @@ int WaveGenerator::updateDepth(int _modifier) {
     // ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return setDepth(depth);
 }
-int WaveGenerator::setDepth(byte _depth) {
+byte WaveGenerator::setDepth(byte _depth) {
     // map exp to 256 ??
     depth = _depth;
     ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return depth;
 }
 
-int WaveGenerator::updateWave(int _modifier) {
+byte WaveGenerator::updateWave(int _modifier) {
     int _tmp = wave + _modifier;
 
     if(_tmp >= MIN_WAVE && _tmp <= MAX_WAVE) {
@@ -108,7 +108,7 @@ int WaveGenerator::updateWave(int _modifier) {
 
     return wave;
 }
-int WaveGenerator::updateMultiplier(int _modifier) {
+byte WaveGenerator::updateMultiplier(int _modifier) {
     int _tmp = multi + _modifier;
 
     if(_tmp >= MIN_MULTI && _tmp <= MAX_MULTI) {
@@ -121,7 +121,7 @@ int WaveGenerator::updateMultiplier(int _modifier) {
 
     return multi;
 }
-int WaveGenerator::updateModulation(int _modifier) {
+byte WaveGenerator::updateModulation(int _modifier) {
     int _tmp = mod + _modifier;
 
     if(_tmp >= MIN_MOD && _tmp <= MAX_MOD) {
@@ -131,7 +131,7 @@ int WaveGenerator::updateModulation(int _modifier) {
     return mod;
 }
 
-int WaveGenerator::setPedalMode(int _modifier) {
+byte WaveGenerator::setPedalMode(int _modifier) {
     int _tmp = pedalMode + _modifier;
 
     if(_tmp >= 0 && _tmp <= 1) {

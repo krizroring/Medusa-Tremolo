@@ -7,7 +7,8 @@
 #include "WaveGenerator.h"
 #include "Rotary.h"
 #include "MedusaDisplay.h"
-#include "PoseidonMenu.h"
+#include "PoseidonTermolo.h"
+#include "MedusaStorage.h"
 
 // definitions
 #define NEXT 1
@@ -22,15 +23,17 @@
 #define READ_INTERVAL 50
 
 // initial values
-int bpm = 60;
-int depth = 100; // maximum depth
-int wave = 2; // sine wave
-int mult = 2; // 1x multiplier
-int mod = 0; // no modulation
+byte bpm = 80; //the bpm
+byte depth = 100; // maximum depth
+byte wave = 0; // sine wave
+byte mult = 2; // 1x multiplier
+byte mod = 0; // no modulation
+byte expression = 0; // the expression pedal assignment
+byte noopVal;
+byte brightness = 1;
+byte pedalMode = 0;
 
-int expression = 0;
-
-int brightness = 1;
+int currentProgram = 1;
 
 int readThreshold = 10;
 int expressionValue = -100;
@@ -41,19 +44,26 @@ int debounce = 0;
 
 // library instantiation
 Rotary r = Rotary(5, 7);
-WaveGenerator waveGenerator = WaveGenerator(bpm, depth, wave, mult, mod, 0);
+WaveGenerator waveGenerator = WaveGenerator();
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
+MedusaStorage medusaStorage = MedusaStorage(0x50);
 
 // menu states
 boolean isMenu = true;
 boolean isActive = true;
 
-// the final outpu value to the vactrol / LDR
+// the final output value to the vactrol / LDR
 int output = 0;
 
-void (*buttonAction)();
+//Pointer to the action functions
+void (*buttonAction)(int);
 void (*changeAction)(int);
+
+// void menuSelectAction();
+// void valueSetAction(int);
+void noop(int);
+void displayMenu();
 
 void changeBPM(int _direction) {
     bpm = waveGenerator.updateBPM(_direction);
@@ -81,77 +91,127 @@ void changeModulation(int _direction) {
 }
 
 void changeExpression(int _direction) {
-    expression += _direction;
+    int _tmp = expression + _direction;
 
-    expression = constrain(expression, 0, EXP);
+    if(_tmp >= 0 && _tmp < poseidonMenu.expressionMenuLength) {
+        expression = _tmp;
+    }
+
     poseidonMenu.displayExpression(expression);
 }
 
-void loadSettings(int _direction) {
-
-
+void changePedalMode(int _direction) {
+    pedalMode = waveGenerator.setPedalMode(_direction);
+    poseidonMenu.displayPedalMode(pedalMode);
 }
 
-void saveSettings(int _direction) {
+void changeProgram(int _direction) {
+    int _tmp = currentProgram + _direction;
 
+    if(_tmp >= 0 && _tmp <= poseidonMenu.numProgramLength) {
+        currentProgram = _tmp;
+    }
 
+    if (currentProgram == 0) {
+        medusaDisplay.writeBack();
+    } else {
+        medusaDisplay.writeDisplay(currentProgram);
+    }
 }
+
 // changes the brightness of the display 1-4
 void changeBrightness(int _direction) {
     brightness = medusaDisplay.updateBrightness(_direction);
     medusaDisplay.writeDisplay(brightness);
 }
+// changes the brightness of the display 1-4
+void setBrightness(int _index) {
+    medusaStorage.saveBrightness(brightness);
+    displayMenu();
+}
 
+void calibrateExpression(int _direction) {
 
-void (*actionFN[9])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier,&changeModulation,
-    &changeExpression, &loadSettings, &saveSettings, &changeBrightness};
+}
+
+static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
+
+void valueSetAction(int _index) {
+
+    medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
+    displayMenu();
+}
+
+void loadProgram(int _index) {
+    if(currentProgram > 0) {
+        medusaStorage.loadSettings(currentProgram, *params);
+    } else {
+        currentProgram = 1;
+    }
+
+    // store the loaded program in the current running program spot
+    medusaStorage.saveSettings(0, *params);
+
+    waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
+
+    displayMenu();
+}
+
+void saveProgram(int _index) {
+    if(currentProgram > 0) {
+        medusaStorage.saveSettings(currentProgram, *params);
+    } else {
+        currentProgram = 1;
+    }
+
+    displayMenu();
+}
+
+void noop(int _index) {
+    displayMenu();
+}
+
+static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
+    &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression};
+static void (*buttonFN[])(int) = {&valueSetAction, &valueSetAction, &valueSetAction, &valueSetAction, &valueSetAction,
+    &valueSetAction, &valueSetAction, &loadProgram, &saveProgram, &setBrightness, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {
-    changeAction = actionFN[_selectedMenuItem];
+    changeAction = changeFN[_selectedMenuItem];
+    buttonAction = buttonFN[_selectedMenuItem];
     (*changeAction)(0);
-}
 
-void menuSelectAction();
-void valueSetAction();
-
-void menuSelectAction() {
-    menuItemSelected(poseidonMenu.getSelectedMenu());
-
-    // TODO find better way for state
     isMenu = false;
-    buttonAction = &valueSetAction;
-    // add custom handler for config
 }
 
-void valueSetAction() {
-    //add save option here
-
+void displayMenu() {
     poseidonMenu.displayCurrentMenu();
     isMenu = true;
-    buttonAction = &menuSelectAction;
+    buttonAction = &menuItemSelected;
 }
-
-
 
 void setup()
 {
     Serial.begin(9600);
+    Wire.begin();
 
     pinMode(LDR_PIN, OUTPUT);
     pinMode(STATUS_PIN, OUTPUT);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     pinMode(EXP_PIN, INPUT);
 
-    medusaDisplay.begin(0x70, 1);
-
-    expressionValue = analogRead(EXP_PIN);
+    // expressionValue = analogRead(EXP_PIN);
 
     //set the button action to be the menu
-    buttonAction = &menuSelectAction;
+    buttonAction = &menuItemSelected;
 
-    poseidonMenu.displayName();
+    medusaStorage.loadSettings(0, *params);
+    waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
+    brightness = medusaStorage.loadBrightness();
+    medusaDisplay.begin(0x70, brightness);
+    poseidonMenu.displayCurrentMenu();
 
     // set the prescaler for the PWN output (~30 kHz)
     TCCR1B = _BV(CS10);
@@ -160,12 +220,12 @@ void setup()
 unsigned long lastPotRead = millis();
 
 void loop() {
-    unsigned long currentMillis = millis();
+    // unsigned long currentMillis = millis();
 
     buttonState = digitalRead(BUTTON_PIN);
 
     if (buttonState == LOW && debounce == 0) {
-        (*buttonAction)();
+        (*buttonAction)(poseidonMenu.getSelectedMenu());
 
         debounce = 1;
     }
@@ -192,20 +252,20 @@ void loop() {
     }
 
 
-    if(currentMillis > lastPotRead + READ_INTERVAL) {
-        int temp =  analogRead(EXP_PIN);
-
-        temp = constrain(temp, 30, 900);
-        // Serial.println(temp);
-        if ((temp > expressionValue + readThreshold) || (temp < expressionValue - readThreshold)) {
-            expressionValue = map(temp, 30, 900, 0, 100);
-
-        }
-
-        Serial.println(expressionValue);
-
-        lastPotRead = currentMillis;
-    }
+    // if(currentMillis > lastPotRead + READ_INTERVAL) {
+    //     int temp =  analogRead(EXP_PIN);
+    //
+    //     temp = constrain(temp, 30, 900);
+    //     // Serial.println(temp);
+    //     if ((temp > expressionValue + readThreshold) || (temp < expressionValue - readThreshold)) {
+    //         expressionValue = map(temp, 30, 900, 0, 100);
+    //
+    //     }
+    //
+    //     Serial.println(expressionValue);
+    //
+    //     lastPotRead = currentMillis;
+    // }
 
     int _output = waveGenerator.generate();
 

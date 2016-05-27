@@ -79,7 +79,12 @@ public:
      */
     void writeDisplay(int _num);
 
-    void writeDigitRaw(uint8_t _n, uint16_t _bitmask);
+    void writeDigitRaw(uint8_t _n, uint16_t _bitmask); // remove
+
+    /*
+    * Writes BACK to the display
+    */
+    void writeBack();
 protected:
     uint8_t i2c_addr;
     uint16_t display_buffer[4];

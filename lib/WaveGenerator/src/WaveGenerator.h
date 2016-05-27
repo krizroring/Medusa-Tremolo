@@ -66,27 +66,27 @@ public:
      /**
      Increases or decreases the Depth
      */
-     int updateDepth(int);
+     byte updateDepth(int);
      /**
      Sets the Depth
      */
-     int setDepth(byte);
+     byte setDepth(byte);
      /**
      Increases or decreases the wave type
      */
-     int updateWave(int);
+     byte updateWave(int);
      /**
      Increases or decreases the multiplier
      */
-     int updateMultiplier(int);
+     byte updateMultiplier(int);
      /**
      Increases or decreases the modulation
      */
-     int updateModulation(int);
+     byte updateModulation(int);
      /**
      Sets the tremolo in tremolo or volume mode
      */
-     int setPedalMode(int);
+     byte setPedalMode(int);
 protected:
     byte bpm;
     byte depth;
