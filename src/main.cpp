@@ -22,6 +22,14 @@
 
 #define READ_INTERVAL 50
 
+// library instantiation
+Rotary r = Rotary(5, 7);
+WaveGenerator waveGenerator = WaveGenerator();
+MedusaDisplay medusaDisplay;
+PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
+MedusaStorage medusaStorage = MedusaStorage(0x50);
+
+
 // initial values
 byte bpm = 80; //the bpm
 byte depth = 100; // maximum depth
@@ -29,9 +37,13 @@ byte wave = 0; // sine wave
 byte mult = 2; // 1x multiplier
 byte mod = 0; // no modulation
 byte expression = 0; // the expression pedal assignment
-byte noopVal;
-byte brightness = 1;
 byte pedalMode = 0;
+
+static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
+
+byte brightness = 1;
+byte noopVal;
+
 
 int currentProgram = 1;
 
@@ -41,13 +53,6 @@ int expressionValue = -100;
 // encoder select button
 int buttonState = 0;
 int debounce = 0;
-
-// library instantiation
-Rotary r = Rotary(5, 7);
-WaveGenerator waveGenerator = WaveGenerator();
-MedusaDisplay medusaDisplay;
-PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
-MedusaStorage medusaStorage = MedusaStorage(0x50);
 
 // menu states
 boolean isMenu = true;
@@ -60,8 +65,6 @@ int output = 0;
 void (*buttonAction)(int);
 void (*changeAction)(int);
 
-// void menuSelectAction();
-// void valueSetAction(int);
 void noop(int);
 void displayMenu();
 
@@ -125,7 +128,7 @@ void changeBrightness(int _direction) {
     medusaDisplay.writeDisplay(brightness);
 }
 // changes the brightness of the display 1-4
-void setBrightness(int _index) {
+void saveBrightness(int _index) {
     medusaStorage.saveBrightness(brightness);
     displayMenu();
 }
@@ -133,8 +136,6 @@ void setBrightness(int _index) {
 void calibrateExpression(int _direction) {
 
 }
-
-static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 
 void saveParam(int _index) {
     medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
@@ -174,7 +175,7 @@ void noop(int _index) {
 static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
     &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression};
 static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam, &saveParam,
-    &saveParam, &saveParam, &loadProgram, &saveProgram, &setBrightness, &noop};
+    &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {
@@ -208,7 +209,6 @@ void setup()
 
     medusaStorage.loadSettings(0, *params);
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
-
     brightness = medusaStorage.loadBrightness();
     medusaDisplay.begin(0x70, brightness);
     poseidonMenu.displayCurrentMenu();
