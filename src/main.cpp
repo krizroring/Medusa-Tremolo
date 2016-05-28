@@ -106,8 +106,6 @@ void changePedalMode(int _direction) {
 }
 
 void saveParam(int _index) {
-    Serial.println(*params[_index]);
-
     medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
     displayMenu();
 }
@@ -124,7 +122,7 @@ void changeProgram(int _direction) {
     if (currentProgram == 0) {
         medusaDisplay.writeBack();
     } else {
-        medusaDisplay.writeDisplay(currentProgram);
+        poseidonMenu.displayProgram(currentProgram);
     }
 }
 
@@ -212,6 +210,14 @@ void setup()
 
     //set the button action to be the menu
     buttonAction = &menuItemSelected;
+
+    // temp function for writing the clean eeprom
+    // for (int i = 0; i< 100 ; i++) {
+    //     medusaStorage.saveSettings(i, params);
+    //     delay(50);
+    // }
+    //
+    // Serial.println("DONE");
 
     medusaStorage.loadSettings(0, params);
 

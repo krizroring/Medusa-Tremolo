@@ -57,7 +57,7 @@ const char MODE_1[] PROGMEM = "VOL ";
 const char* const MODE_NAMES[] PROGMEM = {
     MODE_0, MODE_1};
 
-static const int PROG_LENGTH = 10;
+static const int PROG_LENGTH = 99;
 
 const char CAL_0[] PROGMEM = "MIN ";
 const char CAL_1[] PROGMEM = "MAX ";
@@ -120,5 +120,14 @@ void PoseidonMenu::displayCalibration(int _cal) {
 
 void PoseidonMenu::displayPedalMode(byte _mode) {
     strcpy_P(buffer, (char*)pgm_read_word(&(MODE_NAMES[_mode])));
+    (*display).writeDisplay(buffer);
+}
+
+void PoseidonMenu::displayProgram(int _program) {
+    buffer[0] = 'P';
+    buffer[1] = 'r';
+    buffer[2] = 48 + _program / 10;
+    buffer[3] = 48 + _program % 10;
+
     (*display).writeDisplay(buffer);
 }

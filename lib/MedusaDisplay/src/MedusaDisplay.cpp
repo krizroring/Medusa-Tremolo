@@ -257,7 +257,7 @@ void MedusaDisplay::writeBack() {
 void MedusaDisplay::displayVersion(unsigned int _major, unsigned int _minor) {
     display_buffer[0] = 0b0000110000110000; // V
     display_buffer[1] = 0b0000000000000000; // _empty_
-    display_buffer[2] = pgm_read_word(alphafonttable+(_major+48)) + (1<<14);
+    display_buffer[2] = pgm_read_word(alphafonttable+(_major+48)) + (1<<14); // add dot
     display_buffer[3] = pgm_read_word(alphafonttable+(_minor+48));
 
     flushBuffer();

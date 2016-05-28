@@ -85,7 +85,7 @@ void MedusaStorage::loadSettings(int _prog, byte** _data) {
     Serial.print(*_data[4]);
     Serial.print(" EXP: ");
     Serial.print(*_data[5]);
-    Serial.print(" TO: ");
+    Serial.print(" FROM: ");
     Serial.println(_addr);
 };
 

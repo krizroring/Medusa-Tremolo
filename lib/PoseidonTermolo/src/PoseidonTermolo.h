@@ -25,6 +25,7 @@ public:
     void displayExpression(byte);
     void displayCalibration(int);
     void displayPedalMode(byte);
+    void displayProgram(int);
 
     int expressionMenuLength;
     int numProgramLength;
@@ -33,16 +34,6 @@ protected:
     char buffer[5];
     MedusaDisplay *display;
     void writeDisplay();
-};
-
-class PoseidonFunctions
-{
-public:
-    // add the boot animation?
-
-
-protected:
-
 };
 
 #endif
