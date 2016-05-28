@@ -36,19 +36,19 @@ byte MedusaStorage::loadSetting(unsigned int _addr) {
         data = Wire.read();
     }
 
-    Serial.print("LOAD: ");
-    Serial.print(data);
-    Serial.print(" FROM: ");
-    Serial.println(_addr);
+    // Serial.print("LOAD: ");
+    // Serial.print(data);
+    // Serial.print(" FROM: ");
+    // Serial.println(_addr);
 
     return data;
 }
 
 void MedusaStorage::saveSetting(unsigned int _addr, byte _data) {
-    Serial.print("SAVE: ");
-    Serial.print(_data);
-    Serial.print(" TO: ");
-    Serial.println(_addr);
+    // Serial.print("SAVE: ");
+    // Serial.print(_data);
+    // Serial.print(" TO: ");
+    // Serial.println(_addr);
 
     Wire.beginTransmission(deviceAddress);
     Wire.write((int)(_addr >> 8)); // MSB
@@ -72,41 +72,41 @@ void MedusaStorage::loadSettings(int _prog, byte** _data) {
         };
     };
 
-    Serial.print("LOAD: ");
-    Serial.print("BPM after: ");
-    Serial.print(*_data[0]);
-    Serial.print(" DEPTH: ");
-    Serial.print(*_data[1]);
-    Serial.print(" WAVE: ");
-    Serial.print(*_data[2]);
-    Serial.print(" MULT: ");
-    Serial.print(*_data[3]);
-    Serial.print(" MOD: ");
-    Serial.print(*_data[4]);
-    Serial.print(" EXP: ");
-    Serial.print(*_data[5]);
-    Serial.print(" FROM: ");
-    Serial.println(_addr);
+    // Serial.print("LOAD: ");
+    // Serial.print("BPM after: ");
+    // Serial.print(*_data[0]);
+    // Serial.print(" DEPTH: ");
+    // Serial.print(*_data[1]);
+    // Serial.print(" WAVE: ");
+    // Serial.print(*_data[2]);
+    // Serial.print(" MULT: ");
+    // Serial.print(*_data[3]);
+    // Serial.print(" MOD: ");
+    // Serial.print(*_data[4]);
+    // Serial.print(" EXP: ");
+    // Serial.print(*_data[5]);
+    // Serial.print(" FROM: ");
+    // Serial.println(_addr);
 };
 
 void MedusaStorage::saveSettings(int _prog, byte** _data) {
     unsigned int _addr = PROG_START + (_prog * PROG_LENGTH);
 
-    Serial.print("SAVE: ");
-    Serial.print("BPM: ");
-    Serial.print(*_data[0]);
-    Serial.print(" DEPTH: ");
-    Serial.print(*_data[1]);
-    Serial.print(" WAVE: ");
-    Serial.print(*_data[2]);
-    Serial.print(" MULT: ");
-    Serial.print(*_data[3]);
-    Serial.print(" MOD: ");
-    Serial.print(*_data[4]);
-    Serial.print(" EXP: ");
-    Serial.print(*_data[5]);
-    Serial.print(" TO: ");
-    Serial.println(_addr);
+    // Serial.print("SAVE: ");
+    // Serial.print("BPM: ");
+    // Serial.print(*_data[0]);
+    // Serial.print(" DEPTH: ");
+    // Serial.print(*_data[1]);
+    // Serial.print(" WAVE: ");
+    // Serial.print(*_data[2]);
+    // Serial.print(" MULT: ");
+    // Serial.print(*_data[3]);
+    // Serial.print(" MOD: ");
+    // Serial.print(*_data[4]);
+    // Serial.print(" EXP: ");
+    // Serial.print(*_data[5]);
+    // Serial.print(" TO: ");
+    // Serial.println(_addr);
 
     Wire.beginTransmission(deviceAddress);
     Wire.write((int)(_addr >> 8)); // MSB

@@ -240,7 +240,7 @@ void MedusaDisplay::writeDisplay(int _num) {
             removeLeadingZero = false;
         }
     }
-
+    
     display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
     flushBuffer();
 }

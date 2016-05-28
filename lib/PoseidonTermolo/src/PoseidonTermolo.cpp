@@ -126,7 +126,9 @@ void PoseidonMenu::displayPedalMode(byte _mode) {
 void PoseidonMenu::displayProgram(int _program) {
     buffer[0] = 'P';
     buffer[1] = 'r';
+    // add offset 48 for lookup table
     buffer[2] = 48 + _program / 10;
+    // add offset 48 for lookup table
     buffer[3] = 48 + _program % 10;
 
     (*display).writeDisplay(buffer);

@@ -15,7 +15,6 @@
 #define NEXT 1 // increase ident
 #define PREV -1 // decrese ident
 #define LDR_PIN 9 // ldr pin
-#define STATUS_PIN 10 // status led pin
 #define BUTTON_PIN 6 // encoder button pin
 #define EXP_PIN A0 // expression pedal pin
 #define READ_INTERVAL 50 // expression pedal read interval
@@ -202,7 +201,6 @@ void setup()
     Wire.begin();
 
     pinMode(LDR_PIN, OUTPUT);
-    // pinMode(STATUS_PIN, OUTPUT);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     pinMode(EXP_PIN, INPUT);
 
@@ -285,7 +283,6 @@ void loop() {
     // if (output != _output){
         output = _output;
         analogWrite(LDR_PIN, output);
-        // analogWrite(STATUS_PIN, output);
         // Serial.println(output);
     // }
 }
