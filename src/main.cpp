@@ -10,6 +10,8 @@
 #include "PoseidonTermolo.h"
 #include "MedusaStorage.h"
 
+#include "MemoryFree.h"
+
 // definitions
 #define NEXT 1
 #define PREV -1
@@ -22,8 +24,8 @@
 
 #define READ_INTERVAL 50
 
-static const unsigned int MAJOR = 0;
-static const unsigned int MINOR = 1;
+#define MAJOR 0
+#define MINOR 1
 
 // library instantiation
 Rotary r = Rotary(5, 7);
@@ -31,7 +33,6 @@ WaveGenerator waveGenerator = WaveGenerator();
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
 MedusaStorage medusaStorage = MedusaStorage(0x50);
-
 
 // initial values
 byte bpm = 80; //the bpm
@@ -42,7 +43,7 @@ byte mod = 0; // no modulation
 byte expression = 0; // the expression pedal assignment
 byte pedalMode = 0;
 
-static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
+byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 
 byte brightness = 1;
 
@@ -110,6 +111,9 @@ void changePedalMode(int _direction) {
 }
 
 void saveParam(int _index) {
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
+
     medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
     displayMenu();
 }
@@ -172,10 +176,10 @@ void calibrateExpression(int _direction) {
 }
 
 void displayVersion(int _direction) {
-    // medusaDisplay.writeVersion(MAJOR, MINOR);
+    medusaDisplay.displayVersion(MAJOR, MINOR);
 }
 
-// temp function
+// noop function
 void noop(int _index) {
     displayMenu();
 }
@@ -187,6 +191,9 @@ static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam
 
 void menuItemSelected(int _selectedMenuItem)
 {
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
+
     changeAction = changeFN[_selectedMenuItem];
     buttonAction = buttonFN[_selectedMenuItem];
     (*changeAction)(0);
@@ -283,5 +290,4 @@ void loop() {
         analogWrite(STATUS_PIN, output);
         // Serial.println(output);
     // }
-
 }

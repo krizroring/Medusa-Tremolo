@@ -87,7 +87,7 @@ public:
     /*
     * Writes the version to the display
     */
-    void writeVersion(unsigned int _major, unsigned int _minor);
+    void displayVersion(unsigned int _major, unsigned int _minor);
 
 protected:
     uint8_t i2c_addr;
