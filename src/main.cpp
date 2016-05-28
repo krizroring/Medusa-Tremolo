@@ -9,23 +9,18 @@
 #include "MedusaDisplay.h"
 #include "PoseidonTermolo.h"
 #include "MedusaStorage.h"
-
-#include "MemoryFree.h"
+// #include "MemoryFree.h"
 
 // definitions
-#define NEXT 1
-#define PREV -1
-#define EXP 3
-
-#define LDR_PIN 9
-#define STATUS_PIN 10
-#define BUTTON_PIN 6
-#define EXP_PIN A0
-
-#define READ_INTERVAL 50
-
-#define MAJOR 0
-#define MINOR 1
+#define NEXT 1 // increase ident
+#define PREV -1 // decrese ident
+#define LDR_PIN 9 // ldr pin
+#define STATUS_PIN 10 // status led pin
+#define BUTTON_PIN 6 // encoder button pin
+#define EXP_PIN A0 // expression pedal pin
+#define READ_INTERVAL 50 // expression pedal read interval
+#define MAJOR 0 // major versioj
+#define MINOR 1 // minor version
 
 // library instantiation
 Rotary r = Rotary(5, 7);
@@ -111,8 +106,7 @@ void changePedalMode(int _direction) {
 }
 
 void saveParam(int _index) {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
+    Serial.println(*params[_index]);
 
     medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
     displayMenu();
@@ -136,9 +130,9 @@ void changeProgram(int _direction) {
 
 void loadProgram(int _index) {
     if(currentProgram > 0) {
-        medusaStorage.loadSettings(currentProgram, *params);
+        medusaStorage.loadSettings(currentProgram, params);
         // store the loaded program in the current running program spot
-        medusaStorage.saveSettings(0, *params);
+        medusaStorage.saveSettings(0, params);
         waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     } else {
@@ -150,7 +144,7 @@ void loadProgram(int _index) {
 
 void saveProgram(int _index) {
     if(currentProgram > 0) {
-        medusaStorage.saveSettings(currentProgram, *params);
+        medusaStorage.saveSettings(currentProgram, params);
     } else {
         currentProgram = 1;
     }
@@ -191,9 +185,6 @@ static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam
 
 void menuItemSelected(int _selectedMenuItem)
 {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
-
     changeAction = changeFN[_selectedMenuItem];
     buttonAction = buttonFN[_selectedMenuItem];
     (*changeAction)(0);
@@ -213,7 +204,7 @@ void setup()
     Wire.begin();
 
     pinMode(LDR_PIN, OUTPUT);
-    pinMode(STATUS_PIN, OUTPUT);
+    // pinMode(STATUS_PIN, OUTPUT);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     pinMode(EXP_PIN, INPUT);
 
@@ -222,7 +213,8 @@ void setup()
     //set the button action to be the menu
     buttonAction = &menuItemSelected;
 
-    medusaStorage.loadSettings(0, *params);
+    medusaStorage.loadSettings(0, params);
+
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
     brightness = medusaStorage.loadBrightness();
     medusaDisplay.begin(0x70, brightness);
@@ -287,7 +279,7 @@ void loop() {
     // if (output != _output){
         output = _output;
         analogWrite(LDR_PIN, output);
-        analogWrite(STATUS_PIN, output);
+        // analogWrite(STATUS_PIN, output);
         // Serial.println(output);
     // }
 }

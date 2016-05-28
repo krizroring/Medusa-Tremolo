@@ -24,14 +24,14 @@ public:
     @paran int the porgram number
     @param *byte _data The pointer to the data array
     */
-    void loadSettings(int, byte *_data);
+    void loadSettings(int, byte** _data);
 
     /**
     Saves the selected program
     @paran int the porgram number
     @param *byte _data The pointer to the data array
     */
-    void saveSettings(int, byte *_data);
+    void saveSettings(int, byte** _data);
 
     int programStart;
 protected:

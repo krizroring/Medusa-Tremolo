@@ -6,7 +6,7 @@
 #include "Wire.h"
 
 #define PROG_START 10
-#define PROG_LENGTH 10
+#define PROG_LENGTH 7
 
 MedusaStorage::MedusaStorage(int _deviceAddress) {
     deviceAddress = _deviceAddress;
@@ -36,8 +36,7 @@ byte MedusaStorage::loadSetting(unsigned int _addr) {
         data = Wire.read();
     }
 
-    Serial.println("SAVE");
-    Serial.print("DATA: ");
+    Serial.print("LOAD: ");
     Serial.print(data);
     Serial.print(" FROM: ");
     Serial.println(_addr);
@@ -46,8 +45,7 @@ byte MedusaStorage::loadSetting(unsigned int _addr) {
 }
 
 void MedusaStorage::saveSetting(unsigned int _addr, byte _data) {
-    Serial.println("SAVE");
-    Serial.print("DATA: ");
+    Serial.print("SAVE: ");
     Serial.print(_data);
     Serial.print(" TO: ");
     Serial.println(_addr);
@@ -59,7 +57,7 @@ void MedusaStorage::saveSetting(unsigned int _addr, byte _data) {
     Wire.endTransmission();
 }
 
-void MedusaStorage::loadSettings(int _prog, byte *_data) {
+void MedusaStorage::loadSettings(int _prog, byte** _data) {
     unsigned int _addr = PROG_START + (_prog * PROG_LENGTH);
 
     Wire.beginTransmission(deviceAddress);
@@ -70,43 +68,43 @@ void MedusaStorage::loadSettings(int _prog, byte *_data) {
 
     for ( int i = 0; i < PROG_LENGTH; i++ ) {
         if (Wire.available()) {
-          _data[i] = Wire.read();
+          *_data[i] = (byte)Wire.read();
         };
     };
 
-    Serial.println("LOAD");
-    Serial.print("BPM: ");
-    Serial.print(_data[0]);
+    Serial.print("LOAD: ");
+    Serial.print("BPM after: ");
+    Serial.print(*_data[0]);
     Serial.print(" DEPTH: ");
-    Serial.print(_data[1]);
+    Serial.print(*_data[1]);
     Serial.print(" WAVE: ");
-    Serial.print(_data[2]);
+    Serial.print(*_data[2]);
     Serial.print(" MULT: ");
-    Serial.print(_data[3]);
+    Serial.print(*_data[3]);
     Serial.print(" MOD: ");
-    Serial.print(_data[4]);
+    Serial.print(*_data[4]);
     Serial.print(" EXP: ");
-    Serial.print(_data[5]);
+    Serial.print(*_data[5]);
     Serial.print(" TO: ");
     Serial.println(_addr);
 };
 
-void MedusaStorage::saveSettings(int _prog, byte *_data) {
+void MedusaStorage::saveSettings(int _prog, byte** _data) {
     unsigned int _addr = PROG_START + (_prog * PROG_LENGTH);
 
-    Serial.println("SAVE");
+    Serial.print("SAVE: ");
     Serial.print("BPM: ");
-    Serial.print(_data[0]);
+    Serial.print(*_data[0]);
     Serial.print(" DEPTH: ");
-    Serial.print(_data[1]);
+    Serial.print(*_data[1]);
     Serial.print(" WAVE: ");
-    Serial.print(_data[2]);
+    Serial.print(*_data[2]);
     Serial.print(" MULT: ");
-    Serial.print(_data[3]);
+    Serial.print(*_data[3]);
     Serial.print(" MOD: ");
-    Serial.print(_data[4]);
+    Serial.print(*_data[4]);
     Serial.print(" EXP: ");
-    Serial.print(_data[5]);
+    Serial.print(*_data[5]);
     Serial.print(" TO: ");
     Serial.println(_addr);
 
@@ -115,7 +113,7 @@ void MedusaStorage::saveSettings(int _prog, byte *_data) {
     Wire.write((int)(_addr & 0xFF)); // LSB
 
     for ( int i = 0; i < PROG_LENGTH; i++ ) {
-      Wire.write(_data[i]);
+        Wire.write(*_data[i]);
     };
 
     Wire.endTransmission();
