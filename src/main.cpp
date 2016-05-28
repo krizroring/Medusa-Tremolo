@@ -22,6 +22,9 @@
 
 #define READ_INTERVAL 50
 
+static const unsigned int MAJOR = 0;
+static const unsigned int MINOR = 1;
+
 // library instantiation
 Rotary r = Rotary(5, 7);
 WaveGenerator waveGenerator = WaveGenerator();
@@ -42,8 +45,6 @@ byte pedalMode = 0;
 static byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 
 byte brightness = 1;
-byte noopVal;
-
 
 int currentProgram = 1;
 
@@ -56,7 +57,6 @@ int debounce = 0;
 
 // menu states
 boolean isMenu = true;
-boolean isActive = true;
 
 // the final output value to the vactrol / LDR
 int output = 0;
@@ -68,6 +68,7 @@ void (*changeAction)(int);
 void noop(int);
 void displayMenu();
 
+// Tremolo parameters
 void changeBPM(int _direction) {
     bpm = waveGenerator.updateBPM(_direction);
     medusaDisplay.writeDisplay(bpm);
@@ -108,6 +109,13 @@ void changePedalMode(int _direction) {
     poseidonMenu.displayPedalMode(pedalMode);
 }
 
+void saveParam(int _index) {
+    medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
+    displayMenu();
+}
+
+//Load and save functions
+
 void changeProgram(int _direction) {
     int _tmp = currentProgram + _direction;
 
@@ -121,6 +129,32 @@ void changeProgram(int _direction) {
         medusaDisplay.writeDisplay(currentProgram);
     }
 }
+
+void loadProgram(int _index) {
+    if(currentProgram > 0) {
+        medusaStorage.loadSettings(currentProgram, *params);
+        // store the loaded program in the current running program spot
+        medusaStorage.saveSettings(0, *params);
+        waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
+
+    } else {
+        currentProgram = 1;
+    }
+
+    displayMenu();
+}
+
+void saveProgram(int _index) {
+    if(currentProgram > 0) {
+        medusaStorage.saveSettings(currentProgram, *params);
+    } else {
+        currentProgram = 1;
+    }
+
+    displayMenu();
+}
+
+// System functions
 
 // changes the brightness of the display 1-4
 void changeBrightness(int _direction) {
@@ -137,34 +171,8 @@ void calibrateExpression(int _direction) {
 
 }
 
-void saveParam(int _index) {
-    medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
-    displayMenu();
-}
-
-void loadProgram(int _index) {
-    if(currentProgram > 0) {
-        medusaStorage.loadSettings(currentProgram, *params);
-    } else {
-        currentProgram = 1;
-    }
-
-    // store the loaded program in the current running program spot
-    medusaStorage.saveSettings(0, *params);
-
-    waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
-
-    displayMenu();
-}
-
-void saveProgram(int _index) {
-    if(currentProgram > 0) {
-        medusaStorage.saveSettings(currentProgram, *params);
-    } else {
-        currentProgram = 1;
-    }
-
-    displayMenu();
+void displayVersion(int _direction) {
+    // medusaDisplay.writeVersion(MAJOR, MINOR);
 }
 
 // temp function
@@ -173,9 +181,9 @@ void noop(int _index) {
 }
 
 static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
-    &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression};
+    &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression, &displayVersion};
 static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam, &saveParam,
-    &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &noop};
+    &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &noop, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {

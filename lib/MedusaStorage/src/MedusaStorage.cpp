@@ -10,12 +10,7 @@
 
 MedusaStorage::MedusaStorage(int _deviceAddress) {
     deviceAddress = _deviceAddress;
-
     programStart = PROG_START;
-
-    // 6 bytes for each programm + (4 char for name?) bpm, depth, wave, multi, mod, exp
-    // 4 bytes for config cal low, cal high, brightness, mode
-    // 7 bytes for running program?
 }
 
 

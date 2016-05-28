@@ -83,6 +83,12 @@ public:
     * Writes BACK to the display
     */
     void writeBack();
+
+    /*
+    * Writes the version to the display
+    */
+    void writeVersion(unsigned int _major, unsigned int _minor);
+
 protected:
     uint8_t i2c_addr;
     uint16_t display_buffer[4];

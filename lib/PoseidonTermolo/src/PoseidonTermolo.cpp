@@ -18,9 +18,12 @@ const char MENU_8[] PROGMEM = "LOAD";
 const char MENU_9[] PROGMEM = "SAVE";
 const char MENU_10[] PROGMEM = "DISP";
 const char MENU_11[] PROGMEM = "CAL ";
+const char MENU_12[] PROGMEM = "SYS ";
 
 const char* const MENU_NAMES[] PROGMEM = {
-    MENU_1, MENU_2, MENU_3, MENU_4, MENU_5, MENU_6, MENU_7, MENU_8, MENU_9, MENU_10, MENU_11};
+    MENU_1, MENU_2, MENU_3, MENU_4, MENU_5, MENU_6, MENU_7, MENU_8, MENU_9, MENU_10, MENU_11, MENU_12};
+
+static const int MENU_LENGTH = 12;
 
 const char WAVE_SINE[] PROGMEM = "SINE";
 const char WAVE_SQR[] PROGMEM = "SQR ";
@@ -49,21 +52,17 @@ const char* const EXP_NAMES[] PROGMEM = {
 
 static const int EXP_LENGTH = 4;
 
+const char MODE_0[] PROGMEM = "TREM";
+const char MODE_1[] PROGMEM = "VOL ";
+const char* const MODE_NAMES[] PROGMEM = {
+    MODE_0, MODE_1};
+
 static const int PROG_LENGTH = 10;
 
 const char CAL_0[] PROGMEM = "MIN ";
 const char CAL_1[] PROGMEM = "MAX ";
 const char* const CAL_NAMES[] PROGMEM = {
     CAL_0, CAL_1};
-
-const char MODE_0[] PROGMEM = "TREM";
-const char MODE_1[] PROGMEM = "VOL ";
-const char* const MODE_NAMES[] PROGMEM = {
-    MODE_0, MODE_1};
-
-static const int MENU_LENGTH = 11;
-
-static const char PEDAL_NAME[] = "   POSEIDON   ";
 
 PoseidonMenu::PoseidonMenu(MedusaDisplay *_display) {
     menuIndex = 0;
