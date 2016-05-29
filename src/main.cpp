@@ -289,6 +289,9 @@ void setup()
     buttonAction = &menuItemSelected;
 
     // temp function for writing the clean eeprom
+    // medusaStorage.saveSetting(BRIGHTNESS_ADDR, brightness);
+    // medusaStorage.saveSetting(EXP_MIN_ADDR, (byte) (expressionMin / 4));
+    // medusaStorage.saveSetting(EXP_MAX_ADDR, (byte) (expressionMax / 4));
     // for (int i = 0; i< 100 ; i++) {
     //     medusaStorage.saveSettings(i, params);
     //     delay(50);
@@ -297,18 +300,13 @@ void setup()
     // Serial.println("DONE");
 
     medusaStorage.loadSettings(0, params);
-
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
+
     brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
+    expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
+    expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
+
     medusaDisplay.begin(0x70, brightness);
-
-    expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4) -1;
-    expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4) -1;
-    Serial.print("EXP MIN: ");
-    Serial.print(expressionMin);
-    Serial.print(" EXP MAX: ");
-    Serial.println(expressionMax);
-
     poseidonMenu.displayCurrentMenu();
 
     // set the prescaler for the PWN output (~30 kHz)
