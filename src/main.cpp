@@ -21,6 +21,11 @@
 #define MAJOR 0 // major versioj
 #define MINOR 1 // minor version
 
+#define BRIGHTNESS_ADDR 0
+#define EXP_MIN_ADDR 1
+#define EXP_MAX_ADDR 2
+#define CAL_TIME 3000
+
 // library instantiation
 Rotary r = Rotary(5, 7);
 WaveGenerator waveGenerator = WaveGenerator();
@@ -42,6 +47,13 @@ byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 byte brightness = 1;
 
 int currentProgram = 1;
+
+boolean calibratingMin = false;
+boolean calibratingMax = false;
+int expressionMin = 0; // default values for analog read
+// max at 1020 because of / 4 to store the setting in a byte
+int expressionMax = 1020; // default values for analog read
+unsigned long calStartMillis;
 
 int readThreshold = 10;
 int expressionValue = -100;
@@ -158,12 +170,32 @@ void changeBrightness(int _direction) {
 }
 // changes the brightness of the display 1-4
 void saveBrightness(int _index) {
-    medusaStorage.saveBrightness(brightness);
+    medusaStorage.saveSetting(BRIGHTNESS_ADDR, brightness);
     displayMenu();
 }
 
 void calibrateExpression(int _direction) {
+    if(_direction == 0) {
+        poseidonMenu.displayCalibration(0);
+    }
+    if (_direction == 2) {
+        poseidonMenu.displayCalibration(1);
+    }
+}
 
+void startCalMin(int _index) {
+    medusaDisplay.blinkRate(1);
+    calStartMillis = millis();
+    expressionMin = 0;
+    calibratingMin = true;
+}
+
+void startCalMax(int _index) {
+    medusaDisplay.blinkRate(1);
+    calStartMillis = millis();
+    // max at 1020 because of / 4 to store the setting in a byte
+    expressionMax = 1020;
+    calibratingMax = true;
 }
 
 void displayVersion(int _direction) {
@@ -178,7 +210,7 @@ void noop(int _index) {
 static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
     &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression, &displayVersion};
 static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam, &saveParam,
-    &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &noop, &noop};
+    &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &startCalMin, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {
@@ -195,6 +227,53 @@ void displayMenu() {
     buttonAction = &menuItemSelected;
 }
 
+unsigned long lastPotRead = millis();
+
+void calibration() {
+    unsigned long currentMillis = millis();
+
+    if(currentMillis > lastPotRead + READ_INTERVAL) {
+        int temp = analogRead(EXP_PIN);
+
+        if(calibratingMin && (temp > expressionMin)) {
+            expressionMin = temp;
+        }
+
+        if(calibratingMax && (temp < expressionMax)) {
+            expressionMax = temp;
+        }
+
+        lastPotRead = currentMillis;
+    }
+    if (currentMillis > (calStartMillis + CAL_TIME)) {
+        if (calibratingMin) {
+            medusaStorage.saveSetting(EXP_MIN_ADDR, (byte) (expressionMin / 4));
+
+            calibratingMin = false;
+
+            medusaDisplay.blinkRate(0);
+            calibrateExpression(2);
+
+            Serial.print("CAL MIN: ");
+            Serial.println(expressionMin);
+
+            buttonAction = &startCalMax;
+        }
+        if (calibratingMax) {
+            medusaStorage.saveSetting(EXP_MAX_ADDR, (byte) (expressionMax / 4));
+
+            calibratingMax = false;
+
+            medusaDisplay.blinkRate(0);
+
+            Serial.print("CAL MAX: ");
+            Serial.println(expressionMax);
+
+            displayMenu();
+        }
+    }
+}
+
 void setup()
 {
     Serial.begin(9600);
@@ -204,7 +283,7 @@ void setup()
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     pinMode(EXP_PIN, INPUT);
 
-    // expressionValue = analogRead(EXP_PIN);
+    expressionValue = analogRead(EXP_PIN);
 
     //set the button action to be the menu
     buttonAction = &menuItemSelected;
@@ -220,69 +299,62 @@ void setup()
     medusaStorage.loadSettings(0, params);
 
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
-    brightness = medusaStorage.loadBrightness();
+    brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
     medusaDisplay.begin(0x70, brightness);
+
+    expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4) -1;
+    expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4) -1;
+    Serial.print("EXP MIN: ");
+    Serial.print(expressionMin);
+    Serial.print(" EXP MAX: ");
+    Serial.println(expressionMax);
+
     poseidonMenu.displayCurrentMenu();
 
     // set the prescaler for the PWN output (~30 kHz)
     TCCR1B = _BV(CS10);
 }
 
-unsigned long lastPotRead = millis();
-
 void loop() {
-    // unsigned long currentMillis = millis();
+    if (calibratingMin || calibratingMax) {
+        calibration();
+    } else {
+        buttonState = digitalRead(BUTTON_PIN);
 
-    buttonState = digitalRead(BUTTON_PIN);
+        if (buttonState == LOW && debounce == 0) {
+            (*buttonAction)(poseidonMenu.getSelectedMenu());
 
-    if (buttonState == LOW && debounce == 0) {
-        (*buttonAction)(poseidonMenu.getSelectedMenu());
+            debounce = 1;
+        }
+        if (buttonState == HIGH && debounce == 1) {
+            debounce = 0;
+        }
 
-        debounce = 1;
-    }
-    if (buttonState == HIGH && debounce == 1) {
-        debounce = 0;
-    }
+        unsigned char result = r.process();
 
-    unsigned char result = r.process();
-
-    if(result != DIR_NONE){
-        if(isMenu) {
-            if (result == DIR_CW) {
-                poseidonMenu.next();
+        if(result != DIR_NONE){
+            if(isMenu) {
+                if (result == DIR_CW) {
+                    poseidonMenu.next();
+                } else {
+                    poseidonMenu.prev();
+                }
             } else {
-                poseidonMenu.prev();
-            }
-        } else {
-            if (result == DIR_CW) {
-                (*changeAction)(NEXT);
-            } else {
-                (*changeAction)(PREV);
+                if (result == DIR_CW) {
+                    (*changeAction)(NEXT);
+                } else {
+                    (*changeAction)(PREV);
+                }
             }
         }
+
+        int _output = waveGenerator.generate();
+
+        // if (output != _output){
+            output = _output;
+            analogWrite(LDR_PIN, output);
+            // Serial.println(output);
+        // }
+
     }
-
-
-    // if(currentMillis > lastPotRead + READ_INTERVAL) {
-    //     int temp =  analogRead(EXP_PIN);
-    //
-    //     temp = constrain(temp, 30, 900);
-    //     // Serial.println(temp);
-    //     if ((temp > expressionValue + readThreshold) || (temp < expressionValue - readThreshold)) {
-    //         expressionValue = map(temp, 30, 900, 0, 100);
-    //
-    //     }
-    //
-    //     Serial.println(expressionValue);
-    //
-    //     lastPotRead = currentMillis;
-    // }
-
-    int _output = waveGenerator.generate();
-
-    // if (output != _output){
-        output = _output;
-        analogWrite(LDR_PIN, output);
-        // Serial.println(output);
-    // }
 }
