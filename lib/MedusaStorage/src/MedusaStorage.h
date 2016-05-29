@@ -13,8 +13,6 @@ class MedusaStorage
 {
 public:
     MedusaStorage(int _deviceAddress);
-    void saveBrightness(byte _brightness);
-    byte loadBrightness();
 
     byte loadSetting(unsigned int _addr);
     void saveSetting(unsigned int _addr, byte _data);

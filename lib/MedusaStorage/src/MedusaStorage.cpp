@@ -13,15 +13,6 @@ MedusaStorage::MedusaStorage(int _deviceAddress) {
     programStart = PROG_START;
 }
 
-
-void MedusaStorage::saveBrightness(byte _brightness) {
-    saveSetting(0, _brightness);
-}
-
-byte MedusaStorage::loadBrightness() {
-    return loadSetting(0);
-}
-
 byte MedusaStorage::loadSetting(unsigned int _addr) {
     byte data;
 
