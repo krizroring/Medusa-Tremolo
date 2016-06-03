@@ -99,14 +99,16 @@ protected:
 
     int ldrDepth;
     float multiplier;
-    int period;
-    int periodMultiplied;
-    int newPeriodMultiplied;
-    int lfoPeriod;
+    unsigned int period;
+    unsigned int periodMultiplied;
+    unsigned int newPeriodMultiplied;
+    unsigned int lfoPeriod;
     unsigned long firstPeriod;
     unsigned int halfMultipliedPeriod;
     unsigned int threeQuarterMultipliedPeriod;
-    unsigned long currentMillis;
+
+    elapsedMillis elapsedMillisLFO;
+    elapsedMillis elapsedMillisPeriod;
 
     void updatePeriod();
 

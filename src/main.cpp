@@ -304,7 +304,7 @@ void setup()
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
-    
+
     // maybe bitshift >> 2 to lose 4 points of resolution but save because no rounding is occuring?
     expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
     expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
@@ -313,7 +313,7 @@ void setup()
     poseidonMenu.displayCurrentMenu();
 
     // set the prescaler for the PWN output (~30 kHz)
-    TCCR1B = _BV(CS10);
+    // TCCR1B = _BV(CS10);
 }
 
 void loop() {
