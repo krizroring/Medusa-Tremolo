@@ -43,7 +43,7 @@ void WaveGenerator::setParams(byte _bpm, byte _depth, byte _wave, byte _multi, b
 int WaveGenerator::generate() {
     if (pedalMode == 0) {
         currentMillis = millis();
-        int offset = (currentMillis - firstPeriod) % periodMultiplied;
+        int offset = (currentMillis - firstPeriod) % periodMultiplied; // use elapsed millis
 
         float modulation = 0.0;
         if (mod > 0.0) modulation = generateLFO();
@@ -57,7 +57,7 @@ int WaveGenerator::generate() {
 byte WaveGenerator::setTappedBPM(byte _bpm) {
     bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
 
-    firstPeriod = millis();
+    firstPeriod = millis(); // reset elapsed millis
     setBPM(bpm);
     return bpm;
 }
@@ -143,8 +143,8 @@ byte WaveGenerator::setPedalMode(int _modifier) {
 //Private functions
 
 void WaveGenerator::updatePeriod() {
-    currentMillis = millis();
-    unsigned int _offset = (currentMillis - firstPeriod) % periodMultiplied;
+    currentMillis = millis(); // use elapsed millis
+    unsigned int _offset = (currentMillis - firstPeriod) % periodMultiplied; // use elapsed millis
 
     //adjust first period so that we are the same % of the way through the period
     //so there aren't any jarring transitions
@@ -198,7 +198,7 @@ int WaveGenerator::waveTriSaw(unsigned int _offset) {
 }
 
 float WaveGenerator::generateLFO() {
-    unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod;
+    unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod; // use elapsed millis ?
     // generate the mod rad
     float modRads = ((float)modOffset / (float)lfoPeriod ) * TWO_PI;
     return cos(modRads + LFO_OFFSET) * mod; // magic numbers: LFO_OFFSET (1/8 of the 1 PI perdiod)

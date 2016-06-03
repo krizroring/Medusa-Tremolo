@@ -63,6 +63,7 @@ int buttonState = 0;
 int debounce = 0;
 
 // menu states
+int selectedMenuItem;
 boolean isMenu = true;
 
 // the final output value to the vactrol / LDR
@@ -76,29 +77,29 @@ void noop(int);
 void displayMenu();
 
 // Tremolo parameters
-void changeBPM(int _direction) {
-    bpm = waveGenerator.updateBPM(_direction);
-    medusaDisplay.writeDisplay(bpm);
-}
-
-void changeDepth(int _direction) {
-    depth = waveGenerator.updateDepth(_direction);
-    medusaDisplay.writeDisplay(depth);
-}
-
-void changeWave(int _direction) {
-    wave = waveGenerator.updateWave(_direction);
-    poseidonMenu.displayWave(wave);
-}
-
-void changeMultiplier(int _direction) {
-    mult = waveGenerator.updateMultiplier(_direction);
-    poseidonMenu.displayMultiplier(mult);
-}
-
-void changeModulation(int _direction) {
-    mod = waveGenerator.updateModulation(_direction);
-    medusaDisplay.writeDisplay(mod);
+void paramChange(int _direction) {
+    switch(selectedMenuItem) {
+        case 0:
+            bpm = waveGenerator.updateBPM(_direction);
+            medusaDisplay.writeDisplay(bpm);
+            break;
+        case 1:
+            depth = waveGenerator.updateDepth(_direction);
+            medusaDisplay.writeDisplay(depth);
+            break;
+        case 2:
+            wave = waveGenerator.updateWave(_direction);
+            poseidonMenu.displayWave(wave);
+            break;
+        case 3:
+            mult = waveGenerator.updateMultiplier(_direction);
+            poseidonMenu.displayMultiplier(mult);
+            break;
+        case 4:
+            mod = waveGenerator.updateModulation(_direction);
+            medusaDisplay.writeDisplay(mod);
+            break;
+    }
 }
 
 void changeExpression(int _direction) {
@@ -122,7 +123,6 @@ void saveParam(int _index) {
 }
 
 //Load and save functions
-
 void changeProgram(int _direction) {
     int _tmp = currentProgram + _direction;
 
@@ -207,13 +207,14 @@ void noop(int _index) {
     displayMenu();
 }
 
-static void (*changeFN[])(int) = {&changeBPM, &changeDepth, &changeWave, &changeMultiplier, &changeModulation,
+static void (*changeFN[])(int) = {&paramChange, &paramChange, &paramChange, &paramChange, &paramChange,
     &changeExpression, &changePedalMode, &changeProgram, &changeProgram, &changeBrightness, &calibrateExpression, &displayVersion};
 static void (*buttonFN[])(int) = {&saveParam, &saveParam, &saveParam, &saveParam, &saveParam,
     &saveParam, &saveParam, &loadProgram, &saveProgram, &saveBrightness, &startCalMin, &noop};
 
 void menuItemSelected(int _selectedMenuItem)
 {
+    selectedMenuItem = _selectedMenuItem;
     changeAction = changeFN[_selectedMenuItem];
     buttonAction = buttonFN[_selectedMenuItem];
     (*changeAction)(0);
@@ -303,6 +304,8 @@ void setup()
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
+    
+    // maybe bitshift >> 2 to lose 4 points of resolution but save because no rounding is occuring?
     expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
     expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
 
