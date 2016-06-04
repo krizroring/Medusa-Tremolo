@@ -47,7 +47,7 @@ int WaveGenerator::generate() {
         }
 
         float modulation = 0.0;
-        if (mod > 0.0) modulation = generateLFO();
+        if (mod > 0) modulation = generateLFO();
 
         return constrain((this->*waveFn[wave])(elapsedMillisPeriod) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     } else {
@@ -61,16 +61,9 @@ byte WaveGenerator::setTappedBPM(byte _bpm) {
     elapsedMillisPeriod = 0; // reset elapsed millis
     elapsedMillisLFO = 0;
 
-    setBPM(bpm);
+    setBPM();
     return bpm;
 }
-
-void WaveGenerator::setBPM(byte _bpm) {
-    period = BPM_2_PERIOD(_bpm);
-    newPeriodMultiplied = period / multiplier;
-
-    updatePeriod();
-};
 
 byte WaveGenerator::updateBPM(int _modifier) {
     int _tmp = bpm + _modifier;
@@ -79,7 +72,7 @@ byte WaveGenerator::updateBPM(int _modifier) {
         bpm = _tmp;
     }
 
-    setBPM(bpm);
+    setBPM();
     return bpm;
 }
 
@@ -90,11 +83,10 @@ byte WaveGenerator::updateDepth(int _modifier) {
         depth = _tmp;
     }
 
-    // ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return setDepth(depth);
 }
 byte WaveGenerator::setDepth(byte _depth) {
-    // map exp to 256 ??
+    // map exp to 256 ?? - depends on read resolution
     depth = _depth;
     ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return depth;
@@ -107,8 +99,6 @@ byte WaveGenerator::updateWave(int _modifier) {
         wave = _tmp;
     }
 
-    updatePeriod();
-
     return wave;
 }
 byte WaveGenerator::updateMultiplier(int _modifier) {
@@ -120,7 +110,7 @@ byte WaveGenerator::updateMultiplier(int _modifier) {
 
     multiplier = pgm_read_float(multiplier_table+multi);
 
-    setBPM(bpm);
+    updatePeriod(period / multiplier);
 
     return multi;
 }
@@ -143,20 +133,26 @@ byte WaveGenerator::setPedalMode(int _modifier) {
 
     return pedalMode;
 }
-//Private functions
 
-void WaveGenerator::updatePeriod() {
+//Private functions
+void WaveGenerator::setBPM() {
+    period = BPM_2_PERIOD(bpm);
+
+    updatePeriod(period / multiplier);
+};
+
+void WaveGenerator::updatePeriod(unsigned int _newPeriodMultiplied) {
     //adjust first period so that we are the same % of the way through the period
     //so there aren't any jarring transitions
-    elapsedMillisPeriod = map(elapsedMillisPeriod, 0, periodMultiplied - 1, 0, newPeriodMultiplied - 1);
+    elapsedMillisPeriod = map(elapsedMillisPeriod, 0, periodMultiplied - 1, 0, _newPeriodMultiplied - 1);
 
     unsigned int newLFOPeriod = period * lfo;
     elapsedMillisLFO = map(elapsedMillisLFO, 0, lfoPeriod - 1, 0, newLFOPeriod - 1);
 
-    halfMultipliedPeriod = newPeriodMultiplied / 2;
-    threeQuarterMultipliedPeriod = (newPeriodMultiplied / 4) + halfMultipliedPeriod;
-
-    periodMultiplied = newPeriodMultiplied;
+    lfoPeriod = newLFOPeriod;
+    periodMultiplied = _newPeriodMultiplied;
+    halfMultipliedPeriod = periodMultiplied / 2;
+    threeQuarterMultipliedPeriod = (periodMultiplied / 4) + halfMultipliedPeriod;
 }
 
 // actually cos so we're on at period start
