@@ -7,7 +7,6 @@
 #define MEDUSA_STORAGE_H
 
 #include "Arduino.h"
-#include "Wire.h"
 
 class MedusaStorage
 {

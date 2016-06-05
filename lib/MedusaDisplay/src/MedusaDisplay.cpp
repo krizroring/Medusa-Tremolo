@@ -27,7 +27,7 @@
   ****************************************************
  */
 #include "Arduino.h"
-#include "Wire.h"
+#include <i2c_t3.h>
 
 #include "MedusaDisplay.h"
 
@@ -240,7 +240,7 @@ void MedusaDisplay::writeDisplay(int _num) {
             removeLeadingZero = false;
         }
     }
-    
+
     display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
     flushBuffer();
 }

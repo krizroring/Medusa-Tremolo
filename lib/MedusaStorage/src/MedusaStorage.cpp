@@ -3,7 +3,7 @@
  * Copyright 2016 Christian Roring
  */
 #include "MedusaStorage.h"
-#include "Wire.h"
+#include <i2c_t3.h>
 
 #define PROG_START 10
 #define PROG_LENGTH 7

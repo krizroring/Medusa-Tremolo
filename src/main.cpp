@@ -9,13 +9,13 @@
 #include "MedusaDisplay.h"
 #include "PoseidonTermolo.h"
 #include "MedusaStorage.h"
-// #include "MemoryFree.h"
+#include <i2c_t3.h>
 
 // definitions
 #define NEXT 1 // increase ident
 #define PREV -1 // decrese ident
-#define LDR_PIN 13 // ldr pin
-#define BUTTON_PIN 6 // encoder button pin
+#define LDR_PIN 16 // ldr pin
+#define BUTTON_PIN 12 // encoder button pin
 #define EXP_PIN A0 // expression pedal pin
 #define READ_INTERVAL 50 // expression pedal read interval
 #define MAJOR 0 // major versioj
@@ -27,7 +27,7 @@
 #define CAL_TIME 3000
 
 // library instantiation
-// Rotary r = Rotary(5, 7);
+// Rotary r = Rotary(3, 4);
 WaveGenerator waveGenerator = WaveGenerator();
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
@@ -277,20 +277,24 @@ void calibration() {
 
 void setup()
 {
+    Serial.println("setup");
     Serial.begin(9600);
-    // Wire.begin();
+    //Wire.begin();
+
+
+    Serial.println("Wire");
 
     analogWriteFrequency(16, 46875); // Pin 16 & 17 on FTM1 - ideal for 10 bits
     analogWriteResolution(10); // ideal for 46875 Hz
 
     pinMode(LDR_PIN, OUTPUT);
-    // pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
     // pinMode(EXP_PIN, INPUT);
-    //
+
     // expressionValue = analogRead(EXP_PIN);
-    //
-    // //set the button action to be the menu
-    // buttonAction = &menuItemSelected;
+
+    //set the button action to be the menu
+    buttonAction = &menuItemSelected;
 
     // temp function for writing the clean eeprom
     // medusaStorage.saveSetting(BRIGHTNESS_ADDR, brightness);
@@ -300,18 +304,18 @@ void setup()
     //     medusaStorage.saveSettings(i, params);
     //     delay(50);
     // }
-    //
+
     // Serial.println("DONE");
 
     // medusaStorage.loadSettings(0, params);
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     // brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
-    //
-    // // maybe bitshift >> 2 to lose 4 points of resolution but save because no rounding is occuring?
+
+    // maybe bitshift >> 2 to lose 4 points of resolution but save because no rounding is occuring?
     // expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
     // expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
-    //
+
     // medusaDisplay.begin(0x70, brightness);
     // poseidonMenu.displayCurrentMenu();
 
@@ -351,16 +355,16 @@ void loop() {
     //             }
     //         }
     //     }
-
-        int _output = waveGenerator.generate();
-        //
-        // if (output != _output){
-            output = _output;
-            // analogWrite(LDR_PIN, output);
-            Serial.println(output);
-        // }
-
-        // delay(5);
-
+    //
+    //     int _output = waveGenerator.generate();
+    //     //
+    //     if (output != _output){
+    //         output = _output;
+    //         analogWrite(LDR_PIN, output);
+    //         // Serial.println(output);
+    //     }
+    //
+    //     // delay(5);
+    //
     // }
 }
