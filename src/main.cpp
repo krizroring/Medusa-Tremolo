@@ -17,6 +17,7 @@
 #define LDR_PIN 16 // ldr pin
 #define BUTTON_PIN 12 // encoder button pin
 #define EXP_PIN A0 // expression pedal pin
+#define TAP_PIN 15
 #define READ_INTERVAL 50 // expression pedal read interval
 #define MAJOR 0 // major versioj
 #define MINOR 1 // minor version
@@ -61,6 +62,15 @@ int expressionValue = -100;
 // encoder select button
 int buttonState = 0;
 int debounce = 0;
+elapsedMillis elapsedButtonMillis;
+
+const int maxTaps = 4;
+elapsedMillis elapsedTapMillis;
+volatile int tapCount = 0;
+volatile int tapIndex = 0;
+volatile unsigned long taps[4];
+volatile bool tapPending = false;
+volatile int tapBPM;
 
 // menu states
 int selectedMenuItem;
@@ -228,6 +238,37 @@ void displayMenu() {
     buttonAction = &menuItemSelected;
 }
 
+void tapped() {
+    cli();
+
+    if(elapsedTapMillis > 200) {
+        if(elapsedTapMillis > 1200) { // 2 second reset
+            tapCount = 0;
+            tapIndex = 0;
+            waveGenerator.restart(); // resets the start period
+        } else {
+            taps[tapIndex] = elapsedTapMillis;
+            tapIndex = (tapIndex + 1) % maxTaps;
+            tapCount = constrain(tapCount + 1, 0, maxTaps);
+        }
+    }
+
+    elapsedTapMillis = 0;
+
+    if(tapCount > 1) {
+        int total = 0;
+        for(int i = 0; i < tapCount; i++) {
+            total += taps[i];
+        }
+
+        tapBPM = 60000 / (total / tapCount);
+        Serial.print("tapBPM ");
+        Serial.println(tapBPM);
+        tapPending = true;
+    }
+  sei();
+}
+
 unsigned long lastPotRead = millis();
 
 void calibration() {
@@ -291,6 +332,9 @@ void setup()
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     pinMode(EXP_PIN, INPUT);
 
+    pinMode(TAP_PIN, INPUT); // sets the digital pin as output
+    attachInterrupt(TAP_PIN, tapped, FALLING); // interrrupt 1 is data ready
+
     //set the button action to be the menu
     buttonAction = &menuItemSelected;
 
@@ -320,15 +364,19 @@ void loop() {
     if (calibratingMin || calibratingMax) {
         calibration();
     } else {
-        buttonState = digitalRead(BUTTON_PIN);
+        if (elapsedButtonMillis > 50) {
+            buttonState = digitalRead(BUTTON_PIN);
 
-        if (buttonState == LOW && debounce == 0) {
-            (*buttonAction)(poseidonMenu.getSelectedMenu());
+            if (buttonState == LOW && debounce == 0) {
+                (*buttonAction)(poseidonMenu.getSelectedMenu());
 
-            debounce = 1;
-        }
-        if (buttonState == HIGH && debounce == 1) {
-            debounce = 0;
+                debounce = 1;
+            }
+            if (buttonState == HIGH && debounce == 1) {
+                debounce = 0;
+            }
+
+            elapsedButtonMillis = 0;
         }
 
         unsigned char result = r.process();
@@ -357,7 +405,11 @@ void loop() {
             // Serial.println(output);
         }
 
-        // delay(5);
-
+        if(tapPending) {
+            cli();
+            bpm = waveGenerator.setTappedBPM((byte)tapBPM);
+            tapPending = false;
+            sei();
+        }
     }
 }

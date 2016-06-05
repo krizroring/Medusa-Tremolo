@@ -29,8 +29,8 @@ const char WAVE_SINE[] PROGMEM = "SINE";
 const char WAVE_SQR[] PROGMEM = "SQR ";
 const char WAVE_TRI[] PROGMEM = "TRI ";
 const char WAVE_SAW[] PROGMEM = "SAW ";
-const char WAVE_RSAW[] PROGMEM = "RSAW";
-const char WAVE_TSAW[] PROGMEM = "TSAW";
+const char WAVE_RSAW[] PROGMEM = "rSAW";
+const char WAVE_TSAW[] PROGMEM = "tSAW";
 const char* const WAVE_NAMES[] PROGMEM = {
     WAVE_SINE, WAVE_SQR, WAVE_TRI, WAVE_SAW, WAVE_RSAW, WAVE_TSAW };
 

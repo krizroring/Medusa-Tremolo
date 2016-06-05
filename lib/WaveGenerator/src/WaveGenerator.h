@@ -52,6 +52,10 @@ public:
      */
      int generate();
      /**
+     Restarts the first period
+     */
+     void restart();
+     /**
      Sets a new BPM and resets the first period
      */
      byte setTappedBPM(byte);

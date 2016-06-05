@@ -37,6 +37,7 @@ void WaveGenerator::setParams(byte _bpm, byte _depth, byte _wave, byte _multi, b
     multiplier = pgm_read_float(multiplier_table+multi);
 
     setDepth(depth);
+    restart();
     setTappedBPM(bpm);
 }
 
@@ -55,11 +56,13 @@ int WaveGenerator::generate() {
     }
 };
 
-byte WaveGenerator::setTappedBPM(byte _bpm) {
-    bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
-
+void WaveGenerator::restart() {
     elapsedMillisPeriod = 0; // reset elapsed millis
     elapsedMillisLFO = 0;
+}
+
+byte WaveGenerator::setTappedBPM(byte _bpm) {
+    bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
 
     setBPM();
     return bpm;
