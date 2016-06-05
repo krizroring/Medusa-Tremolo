@@ -27,18 +27,18 @@
 #define CAL_TIME 3000
 
 // library instantiation
-// Rotary r = Rotary(3, 4);
+Rotary r = Rotary(3, 4);
 WaveGenerator waveGenerator = WaveGenerator();
 MedusaDisplay medusaDisplay;
 PoseidonMenu poseidonMenu = PoseidonMenu(&medusaDisplay);
-// MedusaStorage medusaStorage = MedusaStorage(0x50);
+MedusaStorage medusaStorage = MedusaStorage(0x50);
 
 // initial values
 byte bpm = 80; //the bpm
 byte depth = 100; // maximum depth
 byte wave = 0; // sine wave
 byte mult = 2; // 1x multiplier
-byte mod = 100; // no modulation
+byte mod = 0; // no modulation
 byte expression = 0; // the expression pedal assignment
 byte pedalMode = 0;
 
@@ -118,7 +118,7 @@ void changePedalMode(int _direction) {
 }
 
 void saveParam(int _index) {
-    // medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
+    medusaStorage.saveSetting(medusaStorage.programStart + _index, *params[_index]);
     displayMenu();
 }
 
@@ -139,9 +139,9 @@ void changeProgram(int _direction) {
 
 void loadProgram(int _index) {
     if(currentProgram > 0) {
-        // medusaStorage.loadSettings(currentProgram, params);
+        medusaStorage.loadSettings(currentProgram, params);
         // store the loaded program in the current running program spot
-        // medusaStorage.saveSettings(0, params);
+        medusaStorage.saveSettings(0, params);
         waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     } else {
@@ -153,7 +153,7 @@ void loadProgram(int _index) {
 
 void saveProgram(int _index) {
     if(currentProgram > 0) {
-        // medusaStorage.saveSettings(currentProgram, params);
+        medusaStorage.saveSettings(currentProgram, params);
     } else {
         currentProgram = 1;
     }
@@ -170,7 +170,7 @@ void changeBrightness(int _direction) {
 }
 // changes the brightness of the display 1-4
 void saveBrightness(int _index) {
-    // medusaStorage.saveSetting(BRIGHTNESS_ADDR, brightness);
+    medusaStorage.saveSetting(BRIGHTNESS_ADDR, brightness);
     displayMenu();
 }
 
@@ -248,7 +248,7 @@ void calibration() {
     }
     if (currentMillis > (calStartMillis + CAL_TIME)) {
         if (calibratingMin) {
-            // medusaStorage.saveSetting(EXP_MIN_ADDR, (byte) (expressionMin / 4));
+            medusaStorage.saveSetting(EXP_MIN_ADDR, (byte) (expressionMin / 4));
 
             calibratingMin = false;
 
@@ -261,7 +261,7 @@ void calibration() {
             buttonAction = &startCalMax;
         }
         if (calibratingMax) {
-            // medusaStorage.saveSetting(EXP_MAX_ADDR, (byte) (expressionMax / 4));
+            medusaStorage.saveSetting(EXP_MAX_ADDR, (byte) (expressionMax / 4));
 
             calibratingMax = false;
 
@@ -277,21 +277,19 @@ void calibration() {
 
 void setup()
 {
-    Serial.println("setup");
     Serial.begin(9600);
-    //Wire.begin();
+    // delay for teensyLC not having soft reset on serial
+    delay(2000);
 
 
-    Serial.println("Wire");
+    Wire1.begin();
 
     analogWriteFrequency(16, 46875); // Pin 16 & 17 on FTM1 - ideal for 10 bits
     analogWriteResolution(10); // ideal for 46875 Hz
 
     pinMode(LDR_PIN, OUTPUT);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
-    // pinMode(EXP_PIN, INPUT);
-
-    // expressionValue = analogRead(EXP_PIN);
+    pinMode(EXP_PIN, INPUT);
 
     //set the button action to be the menu
     buttonAction = &menuItemSelected;
@@ -305,66 +303,61 @@ void setup()
     //     delay(50);
     // }
 
-    // Serial.println("DONE");
-
-    // medusaStorage.loadSettings(0, params);
+    medusaStorage.loadSettings(0, params);
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
-    // brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
+    brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
 
     // maybe bitshift >> 2 to lose 4 points of resolution but save because no rounding is occuring?
-    // expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
-    // expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
+    expressionMin = (medusaStorage.loadSetting(EXP_MIN_ADDR) * 4);
+    expressionMax = (medusaStorage.loadSetting(EXP_MAX_ADDR) * 4);
 
-    // medusaDisplay.begin(0x70, brightness);
-    // poseidonMenu.displayCurrentMenu();
-
-    // set the prescaler for the PWN output (~30 kHz)
-    // TCCR1B = _BV(CS10);
+    medusaDisplay.begin(0x70, brightness);
+    poseidonMenu.displayCurrentMenu();
 }
 
 void loop() {
-    // if (calibratingMin || calibratingMax) {
-    //     calibration();
-    // } else {
-    //     buttonState = digitalRead(BUTTON_PIN);
-    //
-    //     if (buttonState == LOW && debounce == 0) {
-    //         (*buttonAction)(poseidonMenu.getSelectedMenu());
-    //
-    //         debounce = 1;
-    //     }
-    //     if (buttonState == HIGH && debounce == 1) {
-    //         debounce = 0;
-    //     }
-    //
-    //     unsigned char result = r.process();
-    //
-    //     if(result != DIR_NONE){
-    //         if(isMenu) {
-    //             if (result == DIR_CW) {
-    //                 poseidonMenu.next();
-    //             } else {
-    //                 poseidonMenu.prev();
-    //             }
-    //         } else {
-    //             if (result == DIR_CW) {
-    //                 (*changeAction)(NEXT);
-    //             } else {
-    //                 (*changeAction)(PREV);
-    //             }
-    //         }
-    //     }
-    //
-    //     int _output = waveGenerator.generate();
-    //     //
-    //     if (output != _output){
-    //         output = _output;
-    //         analogWrite(LDR_PIN, output);
-    //         // Serial.println(output);
-    //     }
-    //
-    //     // delay(5);
-    //
-    // }
+    if (calibratingMin || calibratingMax) {
+        calibration();
+    } else {
+        buttonState = digitalRead(BUTTON_PIN);
+
+        if (buttonState == LOW && debounce == 0) {
+            (*buttonAction)(poseidonMenu.getSelectedMenu());
+
+            debounce = 1;
+        }
+        if (buttonState == HIGH && debounce == 1) {
+            debounce = 0;
+        }
+
+        unsigned char result = r.process();
+
+        if(result != DIR_NONE){
+            if(isMenu) {
+                if (result == DIR_CW) {
+                    poseidonMenu.next();
+                } else {
+                    poseidonMenu.prev();
+                }
+            } else {
+                if (result == DIR_CW) {
+                    (*changeAction)(NEXT);
+                } else {
+                    (*changeAction)(PREV);
+                }
+            }
+        }
+
+        int _output = waveGenerator.generate();
+        //
+        if (output != _output){
+            output = _output;
+            analogWrite(LDR_PIN, output);
+            // Serial.println(output);
+        }
+
+        // delay(5);
+
+    }
 }
