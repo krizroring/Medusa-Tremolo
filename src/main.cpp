@@ -46,7 +46,7 @@ byte *params[] = {&bpm, &depth, &wave, &mult, &mod, &expression, &pedalMode};
 
 byte brightness = 1;
 
-int currentProgram = 1;
+int currentProgram = 0;
 
 boolean calibratingMin = false;
 boolean calibratingMax = false;
@@ -280,7 +280,7 @@ void setup()
     Serial.begin(9600);
     // delay for teensyLC not having soft reset on serial
     delay(2000);
-
+    Serial.println("START");
 
     Wire1.begin();
 
@@ -303,7 +303,7 @@ void setup()
     //     delay(50);
     // }
 
-    medusaStorage.loadSettings(0, params);
+    medusaStorage.loadSettings(currentProgram, params);
     waveGenerator.setParams(bpm, depth, wave, mult, mod, pedalMode);
 
     brightness = medusaStorage.loadSetting(BRIGHTNESS_ADDR);
