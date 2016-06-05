@@ -27,7 +27,7 @@
   ****************************************************
  */
 #include "Arduino.h"
-#include "Wire.h"
+#include <i2c_t3.h>
 
 #include "MedusaDisplay.h"
 
@@ -169,9 +169,9 @@ MedusaDisplay::MedusaDisplay(void){};
 void MedusaDisplay::begin(uint8_t _addr = 0x70, uint8_t _b = 1) {
   i2c_addr = _addr;
 
-  Wire.beginTransmission(i2c_addr);
-  Wire.write(0x21);  // turn on oscillator
-  Wire.endTransmission();
+  Wire1.beginTransmission(i2c_addr);
+  Wire1.write(0x21);  // turn on oscillator
+  Wire1.endTransmission();
 
   blinkRate(HT16K33_BLINK_OFF);
 
@@ -189,11 +189,11 @@ void MedusaDisplay::clear(void) {
 }
 
 void MedusaDisplay::setBrightness(uint8_t _b) {
-    Wire.beginTransmission(i2c_addr);
+    Wire1.beginTransmission(i2c_addr);
     brightness = _b;
 
-    Wire.write(HT16K33_CMD_BRIGHTNESS | _b);
-    Wire.endTransmission();
+    Wire1.write(HT16K33_CMD_BRIGHTNESS | _b);
+    Wire1.endTransmission();
 }
 
 byte MedusaDisplay::updateBrightness(int _direction) {
@@ -204,12 +204,12 @@ byte MedusaDisplay::updateBrightness(int _direction) {
 }
 
 void MedusaDisplay::blinkRate(uint8_t _b) {
-  Wire.beginTransmission(i2c_addr);
+  Wire1.beginTransmission(i2c_addr);
 
   if (_b > 3) _b = 0; // turn off if not sure
-  Wire.write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (_b << 1));
+  Wire1.write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (_b << 1));
 
-  Wire.endTransmission();
+  Wire1.endTransmission();
 }
 
 void MedusaDisplay::writeDisplay(char _word[]) {
@@ -240,7 +240,7 @@ void MedusaDisplay::writeDisplay(int _num) {
             removeLeadingZero = false;
         }
     }
-    
+
     display_buffer[3] = pgm_read_word(alphafonttable+(temp[i]+48));
     flushBuffer();
 }
@@ -264,13 +264,13 @@ void MedusaDisplay::displayVersion(unsigned int _major, unsigned int _minor) {
 }
 
 void MedusaDisplay::flushBuffer(void) {
-  Wire.beginTransmission(i2c_addr);
-  Wire.write((uint8_t)0x00); // start at address $00
+  Wire1.beginTransmission(i2c_addr);
+  Wire1.write((uint8_t)0x00); // start at address $00
 
   for (uint8_t i=0; i<4; i++) {
-    Wire.write(display_buffer[i] & 0xFF);
-    Wire.write(display_buffer[i] >> 8);
+    Wire1.write(display_buffer[i] & 0xFF);
+    Wire1.write(display_buffer[i] >> 8);
   }
 
-  Wire.endTransmission();
+  Wire1.endTransmission();
 }

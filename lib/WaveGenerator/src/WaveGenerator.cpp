@@ -16,7 +16,7 @@ static const float LFO_OFFSET = PI / 8; //  tweak for best sound
 WaveGenerator::WaveGenerator() {
     lfo = 8; // param or config?
 
-    firstPeriod = millis();
+    // firstPeriod = millis();
 
     waveFn[0] = &WaveGenerator::waveSin;
     waveFn[1] = &WaveGenerator::waveSquare;
@@ -42,13 +42,14 @@ void WaveGenerator::setParams(byte _bpm, byte _depth, byte _wave, byte _multi, b
 
 int WaveGenerator::generate() {
     if (pedalMode == 0) {
-        currentMillis = millis();
-        int offset = (currentMillis - firstPeriod) % periodMultiplied; // use elapsed millis
+        if (elapsedMillisPeriod >= periodMultiplied) {
+            elapsedMillisPeriod = elapsedMillisPeriod - periodMultiplied;
+        }
 
         float modulation = 0.0;
-        if (mod > 0.0) modulation = generateLFO();
+        if (mod > 0) modulation = generateLFO();
 
-        return constrain((this->*waveFn[wave])(offset) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
+        return constrain((this->*waveFn[wave])(elapsedMillisPeriod) + modulation, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     } else {
         return ldrDepth;
     }
@@ -57,17 +58,12 @@ int WaveGenerator::generate() {
 byte WaveGenerator::setTappedBPM(byte _bpm) {
     bpm = constrain(_bpm, MIN_BPM, MAX_BPM);
 
-    firstPeriod = millis(); // reset elapsed millis
-    setBPM(bpm);
+    elapsedMillisPeriod = 0; // reset elapsed millis
+    elapsedMillisLFO = 0;
+
+    setBPM();
     return bpm;
 }
-
-void WaveGenerator::setBPM(byte _bpm) {
-    period = BPM_2_PERIOD(_bpm);
-    newPeriodMultiplied = period / multiplier;
-
-    updatePeriod();
-};
 
 byte WaveGenerator::updateBPM(int _modifier) {
     int _tmp = bpm + _modifier;
@@ -76,7 +72,7 @@ byte WaveGenerator::updateBPM(int _modifier) {
         bpm = _tmp;
     }
 
-    setBPM(bpm);
+    setBPM();
     return bpm;
 }
 
@@ -87,11 +83,10 @@ byte WaveGenerator::updateDepth(int _modifier) {
         depth = _tmp;
     }
 
-    // ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return setDepth(depth);
 }
 byte WaveGenerator::setDepth(byte _depth) {
-    // map exp to 256 ??
+    // map exp to 256 ?? - depends on read resolution
     depth = _depth;
     ldrDepth = map(depth, MAX_DEPTH, MIN_DEPTH, MAX_LDR_DEPTH, MIN_LDR_DEPTH);
     return depth;
@@ -104,8 +99,6 @@ byte WaveGenerator::updateWave(int _modifier) {
         wave = _tmp;
     }
 
-    updatePeriod();
-
     return wave;
 }
 byte WaveGenerator::updateMultiplier(int _modifier) {
@@ -117,7 +110,7 @@ byte WaveGenerator::updateMultiplier(int _modifier) {
 
     multiplier = pgm_read_float(multiplier_table+multi);
 
-    setBPM(bpm);
+    updatePeriod(period / multiplier);
 
     return multi;
 }
@@ -140,23 +133,26 @@ byte WaveGenerator::setPedalMode(int _modifier) {
 
     return pedalMode;
 }
+
 //Private functions
+void WaveGenerator::setBPM() {
+    period = BPM_2_PERIOD(bpm);
 
-void WaveGenerator::updatePeriod() {
-    currentMillis = millis(); // use elapsed millis
-    unsigned int _offset = (currentMillis - firstPeriod) % periodMultiplied; // use elapsed millis
+    updatePeriod(period / multiplier);
+};
 
+void WaveGenerator::updatePeriod(unsigned int _newPeriodMultiplied) {
     //adjust first period so that we are the same % of the way through the period
     //so there aren't any jarring transitions
-    int effectiveNewOffset = map(_offset, 0, periodMultiplied - 1, 0, newPeriodMultiplied - 1);
-    firstPeriod = currentMillis - effectiveNewOffset;
+    elapsedMillisPeriod = map(elapsedMillisPeriod, 0, periodMultiplied - 1, 0, _newPeriodMultiplied - 1);
 
-    halfMultipliedPeriod = newPeriodMultiplied / 2;
-    threeQuarterMultipliedPeriod = (newPeriodMultiplied / 4) + halfMultipliedPeriod;
+    unsigned int newLFOPeriod = period * lfo;
+    elapsedMillisLFO = map(elapsedMillisLFO, 0, lfoPeriod - 1, 0, newLFOPeriod - 1);
 
-    periodMultiplied = newPeriodMultiplied;
-
-    lfoPeriod = period * lfo;
+    lfoPeriod = newLFOPeriod;
+    periodMultiplied = _newPeriodMultiplied;
+    halfMultipliedPeriod = periodMultiplied / 2;
+    threeQuarterMultipliedPeriod = (periodMultiplied / 4) + halfMultipliedPeriod;
 }
 
 // actually cos so we're on at period start
@@ -198,8 +194,11 @@ int WaveGenerator::waveTriSaw(unsigned int _offset) {
 }
 
 float WaveGenerator::generateLFO() {
-    unsigned int modOffset = (currentMillis - firstPeriod) % lfoPeriod; // use elapsed millis ?
+    if (elapsedMillisLFO >= lfoPeriod) {
+        elapsedMillisLFO = elapsedMillisLFO - lfoPeriod;
+    }
+
     // generate the mod rad
-    float modRads = ((float)modOffset / (float)lfoPeriod ) * TWO_PI;
+    float modRads = ((float)elapsedMillisLFO / (float)lfoPeriod ) * TWO_PI;
     return cos(modRads + LFO_OFFSET) * mod; // magic numbers: LFO_OFFSET (1/8 of the 1 PI perdiod)
 }

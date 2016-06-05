@@ -31,7 +31,6 @@
 #define MEDUSA_DISPLAY_H
 
 #include "Arduino.h"
-#include "Wire.h"
 
 #define HT16K33_CMD_BRIGHTNESS 0xE0
 #define HT16K33_BLINK_CMD 0x80

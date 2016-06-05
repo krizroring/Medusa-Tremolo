@@ -25,7 +25,7 @@
 #define MIN_MULTI 0
 #define MAX_MULTI 4
 
-#define MIN_LDR_DEPTH 255
+#define MIN_LDR_DEPTH 1023 // 10 bits
 #define MAX_LDR_DEPTH 0
 
 // add the expression functions
@@ -47,10 +47,6 @@ public:
      @param int _tremOff Trem or Volume mode.
      */
      void setParams(byte, byte, byte, byte, byte, byte);
-     /**
-     Updates the bpm
-     */
-     void setBPM(byte);
      /**
      Generates the waveform for the wave led (vactrol) and a status led
      */
@@ -99,16 +95,17 @@ protected:
 
     int ldrDepth;
     float multiplier;
-    int period;
-    int periodMultiplied;
-    int newPeriodMultiplied;
-    int lfoPeriod;
-    unsigned long firstPeriod;
+    unsigned int period;
+    unsigned int periodMultiplied;
+    unsigned int lfoPeriod;
     unsigned int halfMultipliedPeriod;
     unsigned int threeQuarterMultipliedPeriod;
-    unsigned long currentMillis;
 
-    void updatePeriod();
+    elapsedMillis elapsedMillisLFO;
+    elapsedMillis elapsedMillisPeriod;
+
+    void setBPM();
+    void updatePeriod(unsigned int);
 
     int waveSin(unsigned int);
     int waveSquare(unsigned int);
